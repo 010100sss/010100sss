@@ -1238,8 +1238,7 @@
             if (user) {
                 const initial = (user.email || 'U')[0].toUpperCase();
                 if (icon) icon.classList.add('hidden');
-                if (letter) { letter.textContent = initial;
-                    letter.classList.remove('hidden'); }
+                if (letter) { letter.textContent = initial; letter.classList.remove('hidden'); }
                 if (pc) pc.innerHTML =
                     `
                 <div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)">
@@ -1264,7 +1263,11 @@
                     letter.classList.add('hidden'); }
                 if (pc) pc.innerHTML =
                     `<iconify-icon icon="lucide:user" width="48" class="text-white/20 mx-auto mb-4"></iconify-icon><p class="text-white/40 text-sm mb-6">登录后查看个人资料</p><button onclick="openLogin()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition">登录 / 注册</button>`;
-                if (R.length) applyUserData([], []);
+                if (R.length) {
+                    // 修复：退出登录时强制重置所有资源的 fav 和 paid 状态
+                    R.forEach(item => { item.fav = false; item.paid = false; });
+                    applyUserData([], []);
+                }
             }
         }
 
