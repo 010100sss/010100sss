@@ -27,7 +27,7 @@
         .bg {
             position: fixed;
             inset: 0;
-            background: url('固定图片/主页背景.jpg')center/cover no-repeat;
+            background: url('固定图片/主页背景.jpg') center/cover no-repeat;
             z-index: 0;
             transform: translateZ(0);
             backface-visibility: hidden
@@ -55,7 +55,6 @@
             overflow: hidden;
         }
 
-        /* 毛玻璃效果：只针对卡片背板（侧边栏、卡片、头部、弹窗、所有 .glass 大容器） */
         .sidebar-desktop,
         .sidebar-mobile,
         .c,
@@ -391,6 +390,7 @@
             color: rgba(255, 255, 255, .7)
         }
 
+        /* ===== 日间模式 ===== */
         .light-theme .glass,
         .light-theme .glass-side,
         .light-theme .c,
@@ -532,6 +532,7 @@
             -webkit-user-select: none
         }
 
+        /* ===== 桌面端 (≥769px) ===== */
         @media(min-width:769px) {
             .app-wrap {
                 display: flex;
@@ -581,6 +582,7 @@
             }
         }
 
+        /* ===== 移动端 (≤768px) - 所有毛玻璃透明度统一为 0.4 ===== */
         @media(max-width:768px) {
             .app-wrap {
                 display: block;
@@ -604,7 +606,7 @@
                 padding: 20px;
                 flex-direction: column;
                 height: 100%;
-                background: rgba(12, 12, 18, 0.7) !important;
+                background: rgba(12, 12, 18, 0.4) !important;
                 border-right: 1px solid rgba(255, 255, 255, .05);
                 border-radius: 0 20px 20px 0;
                 margin: 0;
@@ -658,10 +660,11 @@
                 max-height: 85vh !important;
                 overflow-y: auto !important;
             }
+            /* 手机端卡片背景 0.4 */
             .c {
                 padding: 12px !important;
                 gap: 10px !important;
-                background: rgba(18, 18, 24, 0.7) !important
+                background: rgba(18, 18, 24, 0.4) !important
             }
             .c .db {
                 width: 60px !important;
@@ -717,17 +720,18 @@
                 color: rgba(0, 0, 0, .5);
                 background: rgba(0, 0, 0, .05)
             }
+            /* 手机端毛玻璃统一 0.4 */
             .glass {
-                background: rgba(18, 18, 24, 0.7) !important;
+                background: rgba(18, 18, 24, 0.4) !important;
             }
             .glass-side {
-                background: rgba(12, 12, 18, 0.7) !important;
+                background: rgba(12, 12, 18, 0.4) !important;
             }
             .mini-card {
-                background: rgba(22, 22, 30, 0.85) !important
+                background: rgba(22, 22, 30, 0.4) !important
             }
             .ov .md.glass {
-                background: rgba(18, 18, 24, 0.7) !important;
+                background: rgba(18, 18, 24, 0.4) !important;
             }
             .login-box .ipt {
                 background: rgba(255, 255, 255, .05) !important
@@ -769,8 +773,9 @@
             .i:focus {
                 background: rgba(255, 255, 255, .08) !important
             }
+            /* 手机端头部 0.4 */
             header.glass {
-                background: rgba(18, 18, 24, 0.7) !important;
+                background: rgba(18, 18, 24, 0.4) !important;
                 margin: 8px 8px 0 8px;
                 border-radius: 16px;
                 border: 1px solid rgba(255, 255, 255, .05) !important;
@@ -786,20 +791,21 @@
                 background: rgba(255, 255, 255, .08) !important
             }
             #p-detail .glass {
-                background: rgba(18, 18, 24, 0.7) !important;
+                background: rgba(18, 18, 24, 0.4) !important;
             }
             #dtC .glass {
-                background: rgba(18, 18, 24, 0.7) !important;
+                background: rgba(18, 18, 24, 0.4) !important;
             }
             .mini-card-up .mini-card {
-                background: rgba(22, 22, 30, 0.85) !important
+                background: rgba(22, 22, 30, 0.4) !important
             }
             #p-fav .c {
-                background: rgba(18, 18, 24, 0.7) !important
+                background: rgba(18, 18, 24, 0.4) !important
             }
             #p-purchased .c {
-                background: rgba(18, 18, 24, 0.7) !important
+                background: rgba(18, 18, 24, 0.4) !important
             }
+            /* 手机端日间模式 0.4 */
             .light-theme .glass,
             .light-theme .glass-side,
             .light-theme .c,
@@ -819,7 +825,7 @@
             .light-theme #p-purchased .c,
             .light-theme #p-detail .glass,
             .light-theme #dtC .glass {
-                background: rgba(255, 255, 255, 0.7) !important;
+                background: rgba(255, 255, 255, 0.4) !important;
                 border-color: rgba(0, 0, 0, 0.06) !important
             }
             .light-theme .login-box .btn {
@@ -827,10 +833,10 @@
                 color: #fff !important;
             }
             .light-theme header.glass {
-                background: rgba(255, 255, 255, 0.7) !important
+                background: rgba(255, 255, 255, 0.4) !important
             }
             .light-theme .sidebar-mobile {
-                background: rgba(255, 255, 255, 0.7) !important;
+                background: rgba(255, 255, 255, 0.4) !important;
                 border-color: rgba(0, 0, 0, 0.06) !important
             }
         }
@@ -920,7 +926,6 @@
                 <div class="n on" data-p="home" onclick="go('home')"><iconify-icon icon="lucide:home" width="18"></iconify-icon><span class="text-sm">首页</span></div>
                 <div class="n" data-p="purchased" onclick="go('purchased')"><iconify-icon icon="lucide:shopping-bag" width="18"></iconify-icon><span class="text-sm">已购买</span></div>
                 <div class="n" data-p="fav" onclick="go('fav')"><iconify-icon icon="lucide:heart" width="18"></iconify-icon><span class="text-sm">已收藏</span></div>
-                <!-- 个人资料已移动到已收藏和更新内容之间 -->
                 <div class="n" data-p="profile" onclick="go('profile')"><iconify-icon icon="lucide:user" width="18"></iconify-icon><span class="text-sm">个人资料</span></div>
                 <div class="n" data-p="updates" onclick="go('updates')"><iconify-icon icon="lucide:refresh-cw" width="18"></iconify-icon><span class="text-sm">更新内容</span></div>
                 <div class="n" data-p="contact" onclick="go('contact')"><iconify-icon icon="lucide:mail" width="18"></iconify-icon><span class="text-sm">联系作者</span></div>
@@ -963,7 +968,6 @@
             <div class="n on" data-p="home" onclick="go('home')"><iconify-icon icon="lucide:home" width="18"></iconify-icon><span class="text-sm">首页</span></div>
             <div class="n" data-p="purchased" onclick="go('purchased')"><iconify-icon icon="lucide:shopping-bag" width="18"></iconify-icon><span class="text-sm">已购买</span></div>
             <div class="n" data-p="fav" onclick="go('fav')"><iconify-icon icon="lucide:heart" width="18"></iconify-icon><span class="text-sm">已收藏</span></div>
-            <!-- 个人资料已移动到已收藏和更新内容之间 -->
             <div class="n" data-p="profile" onclick="go('profile')"><iconify-icon icon="lucide:user" width="18"></iconify-icon><span class="text-sm">个人资料</span></div>
             <div class="n" data-p="updates" onclick="go('updates')"><iconify-icon icon="lucide:refresh-cw" width="18"></iconify-icon><span class="text-sm">更新内容</span></div>
             <div class="n" data-p="contact" onclick="go('contact')"><iconify-icon icon="lucide:mail" width="18"></iconify-icon><span class="text-sm">联系作者</span></div>
@@ -1128,12 +1132,12 @@
                     break;
                 }
             }
-            
+
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<iconify-icon icon="lucide:loader-circle" width="15" class="animate-spin"></iconify-icon> 正在退出...';
             }
-            
+
             await _sb.auth.signOut();
             toast('已退出登录');
         }
@@ -1238,7 +1242,8 @@
             if (user) {
                 const initial = (user.email || 'U')[0].toUpperCase();
                 if (icon) icon.classList.add('hidden');
-                if (letter) { letter.textContent = initial; letter.classList.remove('hidden'); }
+                if (letter) { letter.textContent = initial;
+                    letter.classList.remove('hidden'); }
                 if (pc) pc.innerHTML =
                     `
                 <div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)">
@@ -1264,8 +1269,8 @@
                 if (pc) pc.innerHTML =
                     `<iconify-icon icon="lucide:user" width="48" class="text-white/20 mx-auto mb-4"></iconify-icon><p class="text-white/40 text-sm mb-6">登录后查看个人资料</p><button onclick="openLogin()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition">登录 / 注册</button>`;
                 if (R.length) {
-                    // 修复：退出登录时强制重置所有资源的 fav 和 paid 状态
-                    R.forEach(item => { item.fav = false; item.paid = false; });
+                    R.forEach(item => { item.fav = false;
+                        item.paid = false; });
                     applyUserData([], []);
                 }
             }
