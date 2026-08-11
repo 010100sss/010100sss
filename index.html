@@ -582,7 +582,7 @@
             }
         }
 
-        /* ===== 移动端 (≤768px) - 所有毛玻璃透明度统一为 0.4 ===== */
+        /* ===== 移动端 (≤768px) ===== */
         @media(max-width:768px) {
             .app-wrap {
                 display: block;
@@ -660,7 +660,6 @@
                 max-height: 85vh !important;
                 overflow-y: auto !important;
             }
-            /* 手机端卡片背景 0.4 */
             .c {
                 padding: 12px !important;
                 gap: 10px !important;
@@ -720,7 +719,6 @@
                 color: rgba(0, 0, 0, .5);
                 background: rgba(0, 0, 0, .05)
             }
-            /* 手机端毛玻璃统一 0.4 */
             .glass {
                 background: rgba(18, 18, 24, 0.4) !important;
             }
@@ -773,7 +771,6 @@
             .i:focus {
                 background: rgba(255, 255, 255, .08) !important
             }
-            /* 手机端头部 0.4 */
             header.glass {
                 background: rgba(18, 18, 24, 0.4) !important;
                 margin: 8px 8px 0 8px;
@@ -805,7 +802,6 @@
             #p-purchased .c {
                 background: rgba(18, 18, 24, 0.4) !important
             }
-            /* 手机端日间模式 0.4 */
             .light-theme .glass,
             .light-theme .glass-side,
             .light-theme .c,
@@ -1157,13 +1153,15 @@
         }
 
         function showLgView(id) { ['lgMain', 'lgForgot', 'lgReset'].forEach(v => { const el = document.getElementById(v); if (el) el.style.display = v === id ? 'block' : 'none'; }) }
+        
+        // ===== 步骤二：修改重置密码函数，指定重定向地址 =====
         async function handleForgotPassword() {
             const email = document.getElementById('lgForgotEmail').value.trim();
             if (!email) { setForgotMsg('请填写邮箱地址', true); return; }
             const btn = document.getElementById('lgForgotBtn');
             btn.disabled = true;
             btn.textContent = '发送中…';
-            const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.href });
+            const { error } = await _sb.auth.resetPasswordForEmail(email, { redirectTo: 'http://mugen.dpdns.org/' });
             btn.disabled = false;
             btn.textContent = '发送重置链接';
             if (error) { setForgotMsg(error.message || '发送失败', true); } else { setForgotMsg('重置链接已发送，请查收邮件', false); }
@@ -1423,6 +1421,32 @@
             try { localStorage.removeItem('mugen_favs');
                 localStorage.removeItem('mugen_paid'); } catch (e) {}
         }
+
+        // ===== 步骤三：页面加载时检测重置密码链接 =====
+        (function checkResetPassword() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                setTimeout(() => {
+                    openLogin();
+                    showLgView('lgReset');
+                    toast('请设置新密码');
+                }, 600);
+                try {
+                    history.replaceState(null, '', window.location.pathname);
+                } catch(e) {}
+            }
+        })();
+
+        // 监听 hash 变化
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                openLogin();
+                showLgView('lgReset');
+                toast('请设置新密码');
+            }
+        });
+
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { clM('dlM');
                 clM('spM');
                 clM('anM');
