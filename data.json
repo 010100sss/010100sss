@@ -1,0 +1,65 @@
+{
+  "resources": [
+    {
+      "id": 1,
+      "name": "KOFXIIISTEAM",
+      "cover": "https://s41.ax1x.com/2026/08/05/pmT1smT.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/05/pmT1DXV.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/05/pmT1smT.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/05/pmT1y0U.jpg",
+      "size": "1.62GB",
+      "time": "2026-08-05",
+      "compat": "通用",
+      "desc": "高仿拳皇13的MUGEN整合",
+      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-Kx49d",
+      "price": "¥0",
+      "paid": false
+    },
+    {
+      "id": 2,
+      "name": "KOF Zillion Mugen 2018",
+      "cover": "https://s41.ax1x.com/2026/08/08/pmHwNQO.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/08/pmHwJW6.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/08/pmHwNQO.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/08/pmHwaOe.jpg",
+      "size": "646MB",
+      "time": "2026-08-08",
+      "compat": "通用",
+      "desc": "这款游戏最精彩的是角色选择的屏幕，它根据日本队与球队老板的KOF故事进行整理，除了来自The Kizona encounter、Samurai Shodown和Garou:Mark of the Wolves的角色外，还有《狼队》，游戏采用观赛模式，你可以观看自己喜爱的格斗，并拥有自己的锦标赛，如果想使用3v3和4v4模式，也可以使用4G补丁",
+      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-yTAAd",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 3,
+      "name": "KOFH",
+      "cover": "https://s41.ax1x.com/2026/08/10/pmbcE6I.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/10/pmbcGXq.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/10/pmbc31s.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/10/pmbcYn0.md.jpg",
+      "size": "1.78GB",
+      "time": "2026-08-10",
+      "compat": "通用",
+      "desc": "高仿KOF2002UM的MUGEN整合",
+      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-JdSAd",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 4,
+      "name": "KOF98 MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/12/pmLPhh6.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/12/pmLPocD.md.jpg",
+      "size": "1.08GB",
+      "time": "2026-08-12",
+      "compat": "通用",
+      "desc": "高仿KOF98的MUGEN整合",
+      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-riX9d",
+      "paid": false,
+      "price": "¥0"
+    }
+  ],
+  "updates": []
+}
