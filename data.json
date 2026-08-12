@@ -32,7 +32,7 @@
     },
     {
       "id": 3,
-      "name": "KOF2002UM-MUGEN",
+      "name": "KOFH",
       "cover": "https://s41.ax1x.com/2026/08/10/pmbcE6I.jpg",
       "img1": "https://s41.ax1x.com/2026/08/10/pmbcGXq.jpg",
       "img2": "https://s41.ax1x.com/2026/08/10/pmbc31s.jpg",
@@ -40,8 +40,23 @@
       "size": "1.78GB",
       "time": "2026-08-10",
       "compat": "通用",
-      "desc": "自游戏发布以来,最知名的角色是Kyo/Iori/Kim/Athena/chin/Chris/Benimaru/daimon/k'/kula/rugal等。近日,该公司在PS5上发布了一个完整的3D角色,将旧角色带回了《KOF》2002年,并引发了致命的愤怒。粉丝们原本希望获得更多角色。相反,他们在游戏中创造了新的角色。此外,一些玩家对新球队的安排并不满意,但总体而言,这款游戏比他们发布的第一款3D游戏要好得多",
+      "desc": "高仿KOF2002UM的MUGEN整合",
       "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-JdSAd",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 4,
+      "name": "KOF98 MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/12/pmLPhh6.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/12/pmLPocD.md.jpg",
+      "size": "1.08GB",
+      "time": "2026-08-12",
+      "compat": "通用",
+      "desc": "高仿KOF98的MUGEN整合",
+      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-riX9d",
       "paid": false,
       "price": "¥0"
     }
