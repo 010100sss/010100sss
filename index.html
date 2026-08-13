@@ -854,8 +854,8 @@
 
     <div id="anM" class="ov" onclick="if(event.target===this)clM('anM')">
         <div class="md glass rounded-2xl w-full max-w-sm mx-4 p-6 text-center">
-            <h3 class="text-white text-lg font-semibold mb-3">公告</h3>
-            <p class="text-white/50 text-sm leading-relaxed">欢迎来到MUGEN分享站，目前免费提供下载链接，Q群（1044609733)达500人将开启收费通道，该站正在对接邮箱服务，暂时暂时关闭邮箱服务</p>
+            <h3 class="text-white text-lg font-semibold mb-3">Q群（1044609733)达500人将开启收费通道，该站正在对接邮箱服务，暂时关闭邮箱服务</h3>
+            <p class="text-white/50 text-sm leading-relaxed">欢迎来到MUGEN分享站，目前免费提供下载链接，Q群（1044609733)达500人将开启收费通道，抓紧进群吧，010100：致MUGEN玩家</p>
             <button onclick="clM('anM')" class="mt-5 w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition">我知道了</button>
         </div>
     </div>
@@ -1218,8 +1218,13 @@
             el.textContent = msg; }
 
         function applyUserData(favIds, paidIds) {
-            R.forEach(item => { item.fav = favIds.includes(item.id);
-                item.paid = paidIds.includes(item.id) });
+            let changed = false;
+            R.forEach(item => { const nf = favIds.includes(item.id);
+                const np = paidIds.includes(item.id);
+                if (nf !== item.fav || np !== item.paid) changed = true;
+                item.fav = nf;
+                item.paid = np; });
+            if (!changed) return;
             if (cP === 'home') rH();
             else if (cP === 'fav') rF();
             else if (cP === 'purchased') rP();
@@ -1310,11 +1315,10 @@
             _sTimer = setTimeout(() => { sQ = _sI.value.trim().toLowerCase(); if (cP !== 'home') go('home');
                 rH() }, 300) }
 
-        // ===== 修改1：cHTML 中收藏按钮增加 this 参数 =====
         function cHTML(r, sp) { const fc = r.fav ? 'on' : '';
             let pt = '';
             if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>';
-            return `<div class="c p-4 flex gap-4 items-start" onclick="goDt(${r.id})"><div class="db w-20 h-20 flex-shrink-0"><img src="${r.cover||''}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div><div class="flex-1 min-w-0"><div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div><p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p></div><div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()"><span class="ht ${fc}" onclick="tgF(${r.id}, this)" title="收藏"><iconify-icon icon="lucide:heart" width="18"></iconify-icon></span><button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button></div></div>` }
+            return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})"><div class="db w-20 h-20 flex-shrink-0"><img src="${r.cover||''}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div><div class="flex-1 min-w-0"><div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div><p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p></div><div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()"><span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:heart" width="18"></iconify-icon></span><button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button></div></div>` }
 
         function renderList(gId, eId, filter) {
             let items = R.filter(filter);
@@ -1347,13 +1351,13 @@
                     `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`
                     ).join('') } }
 
-        // ===== 修改2：tgF 函数增加 el 参数，直接操作当前图标 =====
-        function tgF(id, el) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; }
+        function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; }
             r.fav = !r.fav;
             toast(r.fav ? '已收藏' : '已取消收藏');
+            document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav));
+            const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav);
             pushUserMeta();
-            if (el) el.classList.toggle('on');
-            if (cP === 'detail') { const h = document.querySelector('#dtC .ht'); if (h) h.classList.toggle('on', r.fav) } }
+            if (cP === 'fav') rF() }
 
         function goDt(id) {
             const r = R.find(item => item.id === id);
