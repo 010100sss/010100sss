@@ -14,36 +14,37 @@ body{background:#e0e5ec;min-height:100vh;display:flex;align-items:center;justify
 <div class="text" id="status">正在确认注册...</div>
 
 <script>
-const supabase = supabase.createClient(
+// 和 reset-password.html 完全一样的写法
+const _sb = supabase.createClient(
   'https://zsqqyvmoejbljzvztclf.supabase.co',
   'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
 )
 
 const statusEl = document.getElementById('status')
 
-// 自执行函数，和 reset-password.html 一样的写法
+// 自执行函数 - 页面加载自动运行
 (function(){
-  const params = new URLSearchParams(window.location.search)
-  const token_hash = params.get('token_hash')
-  const type = params.get('type')
+  const q = window.location.search
+  const p = new URLSearchParams(q)
+  const t = p.get('token_hash')
+  const ty = p.get('type')
 
-  if (!token_hash || !type) {
+  if (t && ty === 'email') {
+    // 全自动验证，用户无感知
+    _sb.auth.verifyOtp({ token_hash: t, type: 'email' })
+      .then(({ error }) => {
+        if (error) {
+          statusEl.textContent = '验证失败：' + error.message
+        } else {
+          statusEl.textContent = '注册成功，请返回登录'
+        }
+      })
+      .catch(() => {
+        statusEl.textContent = '验证请求失败，请重试'
+      })
+  } else {
     statusEl.textContent = '链接无效，请重新发送邮件'
-    return
   }
-
-  statusEl.textContent = '正在验证令牌...'
-  supabase.auth.verifyOtp({ token_hash, type })
-    .then(({ data, error }) => {
-      if (error) {
-        statusEl.textContent = '验证失败：' + error.message
-      } else {
-        statusEl.textContent = '注册成功，请返回登录'
-      }
-    })
-    .catch(() => {
-      statusEl.textContent = '验证请求失败，请重试'
-    })
 })()
 </script>
 </body>
