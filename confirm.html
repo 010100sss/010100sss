@@ -29,16 +29,14 @@ body {
 <body>
 <div class="text" id="status">正在确认注册...</div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-</script>
-<script>
-  // 初始化 Supabase 客户端
-  const supabase = window.supabase.createClient(
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+  const supabase = createClient(
     'https://zsqqyvmoejbljzvztclf.supabase.co',
     'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
   )
 
-  // 从 URL 获取参数
   const params = new URLSearchParams(window.location.search)
   const token_hash = params.get('token_hash')
   const type = params.get('type')
@@ -48,15 +46,18 @@ body {
   if (!token_hash || !type) {
     statusEl.textContent = '链接无效，请重新发送邮件'
   } else {
-    // 调用验证
-    supabase.auth.verifyOtp({ token_hash, type })
-      .then(({ data, error }) => {
-        if (error) {
-          statusEl.textContent = '验证失败：' + error.message
-        } else {
-          statusEl.textContent = '注册成功，请返回登录'
-        }
-      })
+    const { data, error } = await supabase.auth.verifyOtp({ 
+      token_hash, 
+      type 
+    })
+    
+    if (error) {
+      statusEl.textContent = '验证失败：' + error.message
+      console.error('验证错误:', error)
+    } else {
+      statusEl.textContent = '注册成功，请返回登录'
+      console.log('验证成功:', data)
+    }
   }
 </script>
 </body>
