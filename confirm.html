@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>确认注册中...</title>
+<title>确认注册</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -29,36 +30,37 @@ body {
 <body>
 <div class="text" id="status">正在确认注册...</div>
 
-<script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<script>
+const supabase = supabase.createClient(
+  'https://zsqqyvmoejbljzvztclf.supabase.co',
+  'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
+)
 
-  const supabase = createClient(
-    'https://zsqqyvmoejbljzvztclf.supabase.co',
-    'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
-  )
+const statusEl = document.getElementById('status')
 
-  const params = new URLSearchParams(window.location.search)
-  const token_hash = params.get('token_hash')
-  const type = params.get('type')
+// 从 URL query 参数取 token_hash 和 type
+const params = new URLSearchParams(window.location.search)
+const token_hash = params.get('token_hash')
+const type = params.get('type')
 
-  const statusEl = document.getElementById('status')
-
-  if (!token_hash || !type) {
-    statusEl.textContent = '链接无效，请重新发送邮件'
-  } else {
-    const { data, error } = await supabase.auth.verifyOtp({ 
-      token_hash, 
-      type 
+if (!token_hash || !type) {
+  statusEl.textContent = '链接无效，请重新发送邮件'
+} else {
+  supabase.auth.verifyOtp({ token_hash, type })
+    .then(({ data, error }) => {
+      if (error) {
+        statusEl.textContent = '验证失败：' + error.message
+        console.error('验证错误:', error)
+      } else {
+        statusEl.textContent = '注册成功，请返回登录'
+        console.log('验证成功:', data)
+      }
     })
-    
-    if (error) {
-      statusEl.textContent = '验证失败：' + error.message
-      console.error('验证错误:', error)
-    } else {
-      statusEl.textContent = '注册成功，请返回登录'
-      console.log('验证成功:', data)
-    }
-  }
+    .catch((err) => {
+      statusEl.textContent = '验证请求失败，请重试'
+      console.error('请求错误:', err)
+    })
+}
 </script>
 </body>
 </html>
