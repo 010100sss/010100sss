@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 / 注册</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    body{font-family:'Inter',sans-serif}
+    .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景.jpg')center/cover no-repeat;z-index:0}
+    .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:0;pointer-events:none}
+    .glass{background:rgba(18,18,24,0.4);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:24px}
+    .ipt{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;transition:.3s;border-radius:14px;padding:14px 14px 14px 44px;width:100%;font-size:14px}
+    .ipt::placeholder{color:rgba(255,255,255,.45)}
+    .ipt:focus{outline:none;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+    .btn{background:#fff;color:#171717;font-weight:600;transition:.3s;width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;font-size:14px}
+    .btn:hover{background:rgba(255,255,255,.88);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .ico{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+    .ico:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;transform:translateY(-2px)}
+    .line{flex:1;height:1px;background:rgba(255,255,255,.15)}
+    .field{position:relative;margin-bottom:14px}
+    .field .icn{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);pointer-events:none}
+    .psw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);cursor:pointer;transition:color .2s;background:0 0;border:none;padding:4px}
+    .psw-toggle:hover{color:rgba(255,255,255,.7)}
+    @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .fu{animation:fu .6s ease-out both}
+    .msg{padding:10px 14px;border-radius:10px;font-size:13px;text-align:center;margin-bottom:12px;display:none}
+    .msg.err{display:block;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
+    .msg.ok{display:block;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.1)}
+    .pg{display:none}
+    .pg.on{display:block}
+    .link{color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;transition:color .2s}
+    .link:hover{color:rgba(255,255,255,.7)}
+    .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(18,18,24,.92);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 24px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.3);white-space:nowrap;display:inline-block;margin-bottom:8px}
+    .ti.sh{opacity:1;transform:translateY(0)}
+    .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+  <div class="bg-img"></div>
+  <div class="bg-overlay"></div>
+  <div class="tc" id="tC"></div>
+
+  <div class="glass w-full max-w-sm mx-4 p-8 relative z-10 fu login-box">
+    <!-- 主登录 -->
+    <div id="lgMain" class="pg on">
+      <div class="text-center mb-6">
+        <h1 class="text-white text-2xl font-semibold tracking-tight">欢迎回来</h1>
+        <p class="text-white/40 text-sm mt-1">登录或注册你的账户</p>
+      </div>
+      <div id="lgMsg" class="msg"></div>
+      <form id="loginForm">
+        <div class="field">
+          <iconify-icon icon="lucide:mail" width="18" class="icn"></iconify-icon>
+          <input id="lgEmail" type="text" placeholder="邮箱地址" class="ipt" required autocomplete="email">
+        </div>
+        <div class="field">
+          <iconify-icon icon="lucide:lock" width="18" class="icn"></iconify-icon>
+          <input id="lgPsw" type="password" placeholder="密码" class="ipt" required autocomplete="current-password">
+          <button type="button" class="psw-toggle" onclick="togglePsw()">
+            <iconify-icon id="lgEye" icon="lucide:eye-off" width="18"></iconify-icon>
+          </button>
+        </div>
+        <button type="button" id="lgBtn" class="btn mt-1" onclick="handleEmailLogin()">登录 / 注册</button>
+      </form>
+      <div class="text-right mt-2">
+        <span class="link" onclick="showView('lgForgot')">忘记密码？</span>
+      </div>
+      <p class="text-center text-white/25 text-xs mt-4 font-light">登录即表示同意 <a href="#" class="text-white/45 hover:text-white/70 transition">服务条款</a> 与 <a href="#" class="text-white/45 hover:text-white/70 transition">隐私政策</a></p>
+    </div>
+
+    <!-- 忘记密码 -->
+    <div id="lgForgot" class="pg">
+      <div class="text-center mb-5">
+        <h3 class="text-white text-xl font-semibold">重置密码</h3>
+        <p class="text-white/40 text-sm mt-1">输入邮箱，发送重置链接</p>
+      </div>
+      <div id="lgForgotMsg" class="msg"></div>
+      <div class="field">
+        <iconify-icon icon="lucide:mail" width="18" class="icn"></iconify-icon>
+        <input id="lgForgotEmail" type="email" placeholder="邮箱地址" class="ipt" autocomplete="email">
+      </div>
+      <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn mt-1">发送重置链接</button>
+      <div class="text-center mt-3">
+        <span class="link" onclick="showView('lgMain')">← 返回登录</span>
+      </div>
+    </div>
+
+    <!-- 设置新密码 -->
+    <div id="lgReset" class="pg">
+      <div class="text-center mb-5">
+        <h3 class="text-white text-xl font-semibold">设置新密码</h3>
+        <p class="text-white/40 text-sm mt-1">请输入您的新密码</p>
+      </div>
+      <div id="lgResetMsg" class="msg"></div>
+      <div class="field">
+        <iconify-icon icon="lucide:lock" width="18" class="icn"></iconify-icon>
+        <input id="lgNewPsw" type="password" placeholder="新密码（至少6位）" class="ipt" autocomplete="new-password">
+      </div>
+      <button onclick="handleResetPassword()" id="lgResetBtn" class="btn mt-1">确认设置</button>
+    </div>
+
+    <!-- 分隔线 -->
+    <div class="flex items-center gap-3 my-5">
+      <div class="line"></div>
+      <span class="text-white/30 text-xs font-light whitespace-nowrap">其他方式</span>
+      <div class="line"></div>
+    </div>
+
+    <!-- 第三方登录 -->
+    <div class="flex justify-center gap-4">
+      <div class="ico" title="微信登录" onclick="toast('暂未开放')">
+        <iconify-icon icon="ri:wechat-fill" width="22"></iconify-icon>
+      </div>
+      <div class="ico" title="QQ登录" onclick="toast('暂未开放')">
+        <iconify-icon icon="ri:qq-fill" width="22"></iconify-icon>
+      </div>
+      <div class="ico" title="邮箱登录" onclick="toast('当前为邮箱登录')">
+        <iconify-icon icon="lucide:mail" width="20"></iconify-icon>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== Supabase 配置 =====
+    const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
+    const _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
+    const _sb = supabase.createClient(_SB_URL, _SB_KEY);
+
+    // ===== Toast =====
+    const _tC = document.getElementById('tC');
+
+    function toast(m) {
+      const d = document.createElement('div');
+      d.className = 'ti';
+      d.textContent = m;
+      _tC.appendChild(d);
+      requestAnimationFrame(() => d.classList.add('sh'));
+      setTimeout(() => {
+        d.classList.remove('sh');
+        setTimeout(() => d.remove(), 300);
+      }, 2500);
+    }
+
+    // ===== 视图切换 =====
+    function showView(id) {
+      ['lgMain', 'lgForgot', 'lgReset'].forEach(v => {
+        const el = document.getElementById(v);
+        if (el) el.classList.toggle('on', v === id);
+      });
+      ['lgMsg', 'lgForgotMsg', 'lgResetMsg'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.className = 'msg'; el.textContent = ''; }
+      });
+    }
+
+    // ===== 密码显示切换 =====
+    function togglePsw() {
+      const p = document.getElementById('lgPsw');
+      const e = document.getElementById('lgEye');
+      if (p.type === 'password') {
+        p.type = 'text';
+        e.setAttribute('icon', 'lucide:eye');
+      } else {
+        p.type = 'password';
+        e.setAttribute('icon', 'lucide:eye-off');
+      }
+    }
+
+    // ===== 错误翻译=====
+    function translateError(msg) {
+      if (!msg) return '操作失败';
+      const m = msg.toLowerCase();
+      if (m.includes('password should be at least')) return '密码至少需要6位';
+      if (m.includes('unable to validate email')) return '邮箱格式无效';
+      return msg;
+    }
+
+    // ===== 设置消息 =====
+    function setMsg(elId, msg, isErr) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (!msg) { el.className = 'msg'; el.textContent = ''; return; }
+      el.className = 'msg ' + (isErr ? 'err' : 'ok');
+      el.textContent = msg;
+    }
+
+    function setLoading(btnId, loading, text) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      btn.textContent = loading ? '请稍候…' : (text || '登录 / 注册');
+    }
+
+    // ===== 登录 / 注册 =====
+    async function handleEmailLogin() {
+      const email = document.getElementById('lgEmail').value.trim();
+      const pwd = document.getElementById('lgPsw').value;
+      
+      setMsg('lgMsg', '');
+      
+      if (!email || !pwd) { 
+        setMsg('lgMsg', '请填写邮箱和密码', true); 
+        return; 
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        if (pwd.length < 6) {
+          setMsg('lgMsg', '邮箱或密码错误', true);
+        } else {
+          setMsg('lgMsg', '邮箱格式无效', true);
+        }
+        return;
+      }
+
+      setLoading('lgBtn', true);
+
+      let { data, error } = await _sb.auth.signInWithPassword({ email, password: pwd });
+
+      if (error) {
+        if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
+          const r = await _sb.auth.signUp({ email, password: pwd });
+          if (r.error) {
+            setMsg('lgMsg', translateError(r.error.message) || '注册失败', true);
+          } else if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
+            setMsg('lgMsg', '该邮箱已注册，请检查密码', true);
+          } else {
+            // 注册成功（发送确认邮件）—— 不跳转，等待用户确认邮箱
+            setMsg('lgMsg', '已发送！请前往邮箱确认', false);
+            toast('注册成功，请查收邮件确认');
+          }
+        } else {
+          setMsg('lgMsg', translateError(error.message) || '登录失败', true);
+        }
+        setLoading('lgBtn', false);
+        return;
+      }
+
+      // ✅ 登录成功 → 写入标记 → 跳转主页
+      setLoading('lgBtn', false);
+      if (data.user) {
+        toast('登录成功，欢迎回来！');
+        // 写入时间戳标记，供主页检测同步
+        localStorage.setItem('mugen_login_sync', Date.now().toString());
+        // 直接跳转，由主页检测标记并刷新数据
+        window.location.href = 'index.html';
+      } else {
+        setMsg('lgMsg', '未知状态，请重试', true);
+      }
+    }
+
+    // ===== 忘记密码 =====
+    async function handleForgotPassword() {
+      const email = document.getElementById('lgForgotEmail').value.trim();
+      if (!email) { setMsg('lgForgotMsg', '请填写邮箱地址', true); return; }
+      const btn = document.getElementById('lgForgotBtn');
+      btn.disabled = true;
+      btn.textContent = '发送中…';
+      setMsg('lgForgotMsg', '');
+
+      const { error } = await _sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
+      });
+
+      btn.disabled = false;
+      btn.textContent = '发送重置链接';
+      if (error) {
+        setMsg('lgForgotMsg', translateError(error.message) || '发送失败', true);
+      } else {
+        setMsg('lgForgotMsg', '重置链接已发送，请查收邮件', false);
+        toast('重置链接已发送至邮箱');
+        setTimeout(() => showView('lgMain'), 1500);
+      }
+    }
+
+    // ===== 重置密码 =====
+    async function handleResetPassword() {
+      const pw = document.getElementById('lgNewPsw').value;
+      if (!pw || pw.length < 6) { setMsg('lgResetMsg', '密码至少需要6位', true); return; }
+      const btn = document.getElementById('lgResetBtn');
+      btn.disabled = true;
+      btn.textContent = '请稍候…';
+      setMsg('lgResetMsg', '');
+
+      const { error } = await _sb.auth.updateUser({ password: pw });
+
+      btn.disabled = false;
+      btn.textContent = '确认设置';
+      if (error) {
+        setMsg('lgResetMsg', translateError(error.message) || '设置失败', true);
+      } else {
+        // ✅ 重置密码成功 → 写入标记 → 跳转主页
+        setMsg('lgResetMsg', '密码已更新', false);
+        toast('密码已更新成功');
+        localStorage.setItem('mugen_login_sync', Date.now().toString());
+        window.location.href = 'index.html';
+      }
+    }
+
+    // ===== 检测重置密码链接 =====
+    (function checkResetToken() {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        setTimeout(() => {
+          showView('lgReset');
+          toast('请设置新密码');
+        }, 400);
+        try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
+      }
+    })();
+
+    window.addEventListener('hashchange', function() {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        showView('lgReset');
+        toast('请设置新密码');
+      }
+    });
+
+    // ===== 键盘快捷键 =====
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        const reset = document.getElementById('lgReset');
+        if (reset && reset.classList.contains('on')) {
+          showView('lgMain');
+        }
+      }
+    });
+
+    console.log('登录页面已加载，handleEmailLogin 函数可用');
+  </script>
+</body>
+</html>
