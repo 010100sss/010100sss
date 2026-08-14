@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>确认注册中...</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #e0e5ec;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+}
+.text {
+  color: #2c3e50;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 8px;
+  padding: 24px 48px;
+  border-radius: 16px;
+  background: #e0e5ec;
+  box-shadow: 8px 8px 16px #b8bec7, -8px -8px 16px #fff;
+}
+</style>
+</head>
+<body>
+<div class="text" id="status">正在确认注册...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+<script>
+  // 初始化 Supabase 客户端
+  const supabase = window.supabase.createClient(
+    'https://zsqqyvmoejbljzvztclf.supabase.co',
+    'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
+  )
+
+  // 从 URL 获取参数
+  const params = new URLSearchParams(window.location.search)
+  const token_hash = params.get('token_hash')
+  const type = params.get('type')
+
+  const statusEl = document.getElementById('status')
+
+  if (!token_hash || !type) {
+    statusEl.textContent = '链接无效，请重新发送邮件'
+  } else {
+    // 调用验证
+    supabase.auth.verifyOtp({ token_hash, type })
+      .then(({ data, error }) => {
+        if (error) {
+          statusEl.textContent = '验证失败：' + error.message
+        } else {
+          statusEl.textContent = '注册成功，请返回登录'
+        }
+      })
+  }
+</script>
+</body>
+</html>
