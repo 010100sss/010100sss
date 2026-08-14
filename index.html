@@ -148,7 +148,9 @@
             transition: transform .15s, color .15s;
             -webkit-tap-highlight-color: transparent;
             user-select: none;
-            -webkit-user-select: none
+            -webkit-user-select: none;
+            background: transparent;
+            border: none;
         }
         .ht:hover {
             transform: scale(1.1)
@@ -415,6 +417,15 @@
             border-color: rgba(0, 0, 0, 0.07) !important;
             color: #1a1a1a !important
         }
+        /* 修复：日间模式下 .ht 背景透明，消除方形 */
+        .light-theme .ht {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        .light-theme .ht.on {
+            background: transparent !important;
+        }
         .light-theme .app-wrap {
             background: rgba(255, 255, 255, 0.3) !important;
         }
@@ -499,7 +510,8 @@
             background: rgba(0, 0, 0, 0.1) !important
         }
         .light-theme .ht.on {
-            color: #ef4444 !important
+            color: #ef4444 !important;
+            background: transparent !important;
         }
         .light-theme .sw {
             background: rgba(0, 0, 0, 0.1);
@@ -823,6 +835,15 @@
             .light-theme #dtC .glass {
                 background: rgba(255, 255, 255, 0.4) !important;
                 border-color: rgba(0, 0, 0, 0.06) !important
+            }
+            /* 移动端日间 .ht 透明修复 */
+            .light-theme .ht {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            .light-theme .ht.on {
+                background: transparent !important;
             }
             .light-theme .login-box .btn {
                 background: rgba(0, 0, 0, 0.85) !important;
@@ -1266,8 +1287,8 @@
                     `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`
                     ).join('') } }
 
-        function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏');
-                openLoginPage(); return; }
+        // ===== 修改后的 tgF：只提示，不跳转 =====
+        function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; }
             r.fav = !r.fav;
             toast(r.fav ? '已收藏' : '已取消收藏');
             document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav));
