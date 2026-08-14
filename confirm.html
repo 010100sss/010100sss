@@ -7,44 +7,76 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#e0e5ec;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:sans-serif}
-.text{color:#2c3e50;font-size:24px;font-weight:600;letter-spacing:8px;padding:24px 48px;border-radius:16px;background:#e0e5ec;box-shadow:8px 8px 16px #b8bec7,-8px -8px 16px #fff}
+.box{background:#e0e5ec;border-radius:24px;padding:36px 32px;max-width:360px;width:100%;box-shadow:8px 8px 16px #b8bec7,-8px -8px 16px #fff}
+h2{text-align:center;color:#2c3e50;font-size:20px;margin-bottom:4px}
+.sub{text-align:center;color:#7f8c8d;font-size:13px;margin-bottom:20px}
+.msg{padding:10px;border-radius:10px;font-size:13px;text-align:center;margin-bottom:12px;background:rgba(46,204,113,.1);color:#27ae60;display:block}
+.msg.err{background:rgba(231,76,60,.1);color:#c0392b}
+.msg.loading{color:#7f8c8d}
 </style>
 </head>
 <body>
-<div class="text" id="status">正在确认注册...</div>
+<div class="box">
+<h2>确认注册</h2>
+<div class="sub" id="sub">请确认您的邮箱</div>
+<div id="msg" class="msg loading">加载中...</div>
+</div>
 
 <script>
-// 和 reset-password.html 完全一样的写法
 const _sb = supabase.createClient(
   'https://zsqqyvmoejbljzvztclf.supabase.co',
   'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE'
 )
 
-const statusEl = document.getElementById('status')
+const $ = id => document.getElementById(id)
+const msg = $('msg')
+const sub = $('sub')
 
-// 自执行函数 - 页面加载自动运行
+function setMsg(t, e) {
+  if (!t) { msg.className = 'msg'; msg.textContent = ''; return }
+  msg.className = 'msg ' + (e ? 'err' : 'ok')
+  msg.textContent = t
+}
+
+function transErr(m) {
+  if (!m) return '操作失败'
+  const l = m.toLowerCase()
+  if (l.includes('invalid') || l.includes('expired')) return '链接无效或已过期'
+  return m
+}
+
+// 自执行函数 - 完全复制 reset-password.html 的结构
 (function(){
   const q = window.location.search
-  const p = new URLSearchParams(q)
-  const t = p.get('token_hash')
-  const ty = p.get('type')
+  msg.textContent = '加载中...'
+  msg.className = 'msg loading'
 
-  if (t && ty === 'email') {
-    // 全自动验证，用户无感知
-    _sb.auth.verifyOtp({ token_hash: t, type: 'email' })
-      .then(({ error }) => {
-        if (error) {
-          statusEl.textContent = '验证失败：' + error.message
-        } else {
-          statusEl.textContent = '注册成功，请返回登录'
-        }
-      })
-      .catch(() => {
-        statusEl.textContent = '验证请求失败，请重试'
-      })
-  } else {
-    statusEl.textContent = '链接无效，请重新发送邮件'
+  if (q && q.includes('token_hash')) {
+    const p = new URLSearchParams(q)
+    const t = p.get('token_hash')
+    const ty = p.get('type')
+    if (t && ty === 'email') {
+      msg.textContent = '正在验证令牌...'
+      _sb.auth.verifyOtp({ token_hash: t, type: 'email' })
+        .then(({ error }) => {
+          if (error) {
+            setMsg(transErr(error.message), 1)
+            sub.textContent = '验证失败'
+            return
+          }
+          setMsg('验证通过，请返回登录', 0)
+          sub.textContent = '注册成功'
+        })
+        .catch(() => {
+          setMsg('验证请求失败，请重试', 1)
+          sub.textContent = '请求失败'
+        })
+      return  // 重要：验证流程中，直接返回
+    }
   }
+  // 如果上面的 if 没匹配到，或者验证失败（但失败已在 then 里处理），这里处理无效链接
+  setMsg('链接无效，请重新发送邮件', 1)
+  sub.textContent = '链接无效'
 })()
 </script>
 </body>
