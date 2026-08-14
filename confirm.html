@@ -43,6 +43,9 @@ const params = new URLSearchParams(window.location.search)
 const token_hash = params.get('token_hash')
 const type = params.get('type')
 
+// 调试：把取到的值显示在页面上
+statusEl.textContent = 'token_hash=' + token_hash + ', type=' + type
+
 if (!token_hash || !type) {
   statusEl.textContent = '链接无效，请重新发送邮件'
 } else {
