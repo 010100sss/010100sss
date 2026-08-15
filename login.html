@@ -40,7 +40,7 @@
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
     @media(max-width:768px){.glass{max-width:70vw;margin:0 auto;padding:12px 16px}}
 
-    /* ===== 日间模式 ===== */
+    /* ===== 日间模式（完全仿照 index.html） ===== */
     body.light-theme .bg-overlay{background:rgba(255,255,255,0.3)}
     body.light-theme .glass{background:rgba(255,255,255,0.4);border-color:rgba(0,0,0,0.07)}
     body.light-theme .ipt{background:rgba(255,255,255,0.4);border-color:rgba(0,0,0,0.07);color:#1a1a1a}
@@ -109,7 +109,7 @@
       </div>
       <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn mt-1">发送重置链接</button>
       <div class="text-center mt-3">
-        <button onclick="showView('lgMain')" class="link" style="background:transparent;border:none;font-size:12px;cursor:pointer;padding:8px 0;">← 返回登录</button>
+        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.08);">← 返回登录</button>
       </div>
     </div>
 
@@ -147,10 +147,10 @@
 
   <script>
     // ===== 读取主题 =====
-    (function() {
-      const theme = localStorage.getItem('mugen_theme');
+    try {
+      const theme = JSON.parse(localStorage.getItem('mugen_theme'));
       if (theme === 'light') document.body.classList.add('light-theme');
-    })();
+    } catch(e) {}
 
     const SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
     const SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
