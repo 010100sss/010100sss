@@ -11,17 +11,13 @@
   <style>
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景.jpg')center/cover no-repeat;z-index:0}
-    /* 修复：255,255,0 → 255,255,255 */
     .glass{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.07);border-radius:12px;transition:background .25s ease,border-color .25s ease;padding:24px}
-    /* 输入框统一：圆角12px，上下padding12，左侧40px图标位，无动效 */
     .ipt{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#1a1a1a;transition:none;border-radius:12px;padding:12px 14px 12px 40px;width:100%;font-size:14px}
     .ipt::placeholder{color:rgba(0,0,0,0.35)}
     .ipt:focus{outline:none;background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);box-shadow:none}
-    /* 按钮圆角12px，padding13，对齐index标准 */
     .btn{background:#1a1a1a;color:#fff;font-weight:600;transition:.3s;width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;font-size:14px}
     .btn:hover{background:rgba(0,0,0,0.85);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    /* 第三方登录图标圆角12→50保持圆形不变，padding尺寸统一 */
     .ico{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#000;transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
     .ico:hover{background:rgba(255,255,255,0.6);border-color:rgba(0,0,0,0.15);color:#000;transform:translateY(-2px)}
     .line{flex:1;height:1px;background:rgba(0,0,0,0.12)}
@@ -42,15 +38,17 @@
     .ti.sh{opacity:1;transform:translateY(0)}
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
     @media(max-width:768){.glass{max-width:70vw;margin:0 auto;padding:16px}}
-    .text-white{color:#000 !important}
-    .text-white\/40{color:#000 !important}
-    .text-white\/25{color:rgba(0,0,0,0.4)}
-    .text-white\/30{color:#000 !important}
-    .text-white\/45{color:#000 !important}
-    /* ===== 夜间模式覆盖 ===== */
+
+    /* 自定义文字类 - 日间无!important，和tailwind无冲突 */
+    .theme-main{color:#000;}
+    .theme-40{color:rgba(0,0,0,0.4);}
+    .theme-30{color:rgba(0,0,0,0.3);}
+    .theme-45{color:rgba(0,0,0,0.45);}
+    .theme-25{color:rgba(0,0,0,0.25);}
+
+    /* ===== 夜间模式专属覆盖，完全独立互不干扰 ===== */
     body.dark-theme .bg-overlay{background:rgba(0,0,0,0.55)}
     body.dark-theme .glass{background:rgba(18,18,24,0.4);border-color:rgba(255,255,255,.08);border-radius:12px;padding:24px}
-    /* 夜间输入框同步圆角12px、padding12、无过渡 */
     body.dark-theme .ipt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff;transition:none;border-radius:12px;padding:12px 14px 12px 40px}
     body.dark-theme .ipt::placeholder{color:rgba(255,255,255,.45)}
     body.dark-theme .ipt:focus{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);box-shadow:none}
@@ -59,11 +57,13 @@
     body.dark-theme .psw-toggle:hover{color:rgba(255,255,255,.7)}
     body.dark-theme .line{background:rgba(255,255,255,.15)}
     body.dark-theme h1,body.dark-theme h3{color:#fff}
-    body.dark-theme .text-white{color:#fff}
-    body.dark-theme .text-white\/40{color:rgba(255,255,255,.4)}
-    body.dark-theme .text-white\/25{color:rgba(255,255,255,.25)}
-    body.dark-theme .text-white\/30{color:rgba(255,255,255,.3)}
-    body.dark-theme .text-white\/45{color:rgba(255,255,255,.45)}
+    /* 夜间自定义文字配色 */
+    body.dark-theme .theme-main{color:#fff}
+    body.dark-theme .theme-40{color:rgba(255,255,255,.4)}
+    body.dark-theme .theme-30{color:rgba(255,255,255,.3)}
+    body.dark-theme .theme-45{color:rgba(255,255,255,.45)}
+    body.dark-theme .theme-25{color:rgba(255,255,255,.25)}
+
     body.dark-theme .link{color:rgba(255,255,255,.35)}
     body.dark-theme .link:hover{color:rgba(255,255,255,.7)}
     body.dark-theme .ico{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
@@ -80,12 +80,11 @@
   <div class="bg-img"></div>
   <div class="bg-overlay"></div>
   <div class="tc" id="tC"></div>
-  <!-- 外层容器删除p-8类，由css统一padding:24px（对应p6） -->
   <div class="glass w-full max-w-sm mx-4 relative z-10 fu login-box">
     <div id="lgMain" class="pg on">
       <div class="text-center mb-6">
-        <h1 class="text-white text-2xl font-semibold tracking-tight">欢迎回来</h1>
-        <p class="text-white/40 text-sm mt-1">登录或注册你的账户</p>
+        <h1 class="theme-main text-2xl font-semibold tracking-tight">欢迎回来</h1>
+        <p class="theme-40 text-sm mt-1">登录或注册你的账户</p>
       </div>
       <div id="lgMsg" class="msg"></div>
       <form id="loginForm">
@@ -105,12 +104,12 @@
       <div class="text-right mt-2">
         <span class="link" onclick="showView('lgForgot')">忘记密码？</span>
       </div>
-      <p class="text-center text-black text-xs mt-4 font-light">登录即表示同意 <a href="#" class="text-white/45 hover:text-black/70 transition">服务条款</a> 与 <a href="#" class="text-white/45 hover:text-black/70 transition">隐私政策</a></p>
+      <p class="text-center theme-45 text-xs mt-4 font-light">登录即表示同意 <a href="#" class="theme-45 hover:text-black/70 transition">服务条款</a> 与 <a href="#" class="theme-45 hover:text-black/70 transition">隐私政策</a></p>
     </div>
     <div id="lgForgot" class="pg">
       <div class="text-center mb-5">
-        <h3 class="text-white text-xl font-semibold">重置密码</h3>
-        <p class="text-white/40 text-sm mt-1">输入邮箱，发送重置链接</p>
+        <h3 class="theme-main text-xl font-semibold">重置密码</h3>
+        <p class="theme-40 text-sm mt-1">输入邮箱，发送重置链接</p>
       </div>
       <div id="lgForgotMsg" class="msg"></div>
       <div class="field">
@@ -124,8 +123,8 @@
     </div>
     <div id="lgReset" class="pg">
       <div class="text-center mb-5">
-        <h3 class="text-white text-xl font-semibold">设置新密码</h3>
-        <p class="text-white/40 text-sm mt-1">请输入您的新密码</p>
+        <h3 class="theme-main text-xl font-semibold">设置新密码</h3>
+        <p class="theme-40 text-sm mt-1">请输入您的新密码</p>
       </div>
       <div id="lgResetMsg" class="msg"></div>
       <div class="field">
@@ -136,7 +135,7 @@
     </div>
     <div class="flex items-center gap-3 my-5">
       <div class="line"></div>
-      <span class="text-white/30 text-xs font-light whitespace-nowrap">其他方式</span>
+      <span class="theme-30 text-xs font-light whitespace-nowrap">其他方式</span>
       <div class="line"></div>
     </div>
     <div class="flex justify-center gap-4">
