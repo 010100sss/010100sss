@@ -12,7 +12,7 @@
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景.jpg')center/cover no-repeat;z-index:0}
     .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:0;pointer-events:none}
-    .glass{background:rgba(18,18,24,0.4);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.08);border-radius:24px}
+    .glass{background:rgba(18,18,24,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:14px}
     .ipt{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;transition:.3s;border-radius:14px;padding:14px 14px 14px 44px;width:100%;font-size:14px}
     .ipt::placeholder{color:rgba(255,255,255,.45)}
     .ipt:focus{outline:none;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
@@ -38,6 +38,7 @@
     .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(18,18,24,.92);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 24px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.3);white-space:nowrap;display:inline-block;margin-bottom:8px}
     .ti.sh{opacity:1;transform:translateY(0)}
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
+    @media(max-width:768px){.glass{max-width:70vw;margin:0 auto;padding:12px 16px}}
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
@@ -46,7 +47,6 @@
   <div class="tc" id="tC"></div>
 
   <div class="glass w-full max-w-sm mx-4 p-8 relative z-10 fu login-box">
-    <!-- 主登录 -->
     <div id="lgMain" class="pg on">
       <div class="text-center mb-6">
         <h1 class="text-white text-2xl font-semibold tracking-tight">欢迎回来</h1>
@@ -73,7 +73,6 @@
       <p class="text-center text-white/25 text-xs mt-4 font-light">登录即表示同意 <a href="#" class="text-white/45 hover:text-white/70 transition">服务条款</a> 与 <a href="#" class="text-white/45 hover:text-white/70 transition">隐私政策</a></p>
     </div>
 
-    <!-- 忘记密码 -->
     <div id="lgForgot" class="pg">
       <div class="text-center mb-5">
         <h3 class="text-white text-xl font-semibold">重置密码</h3>
@@ -90,7 +89,6 @@
       </div>
     </div>
 
-    <!-- 设置新密码 -->
     <div id="lgReset" class="pg">
       <div class="text-center mb-5">
         <h3 class="text-white text-xl font-semibold">设置新密码</h3>
@@ -104,14 +102,12 @@
       <button onclick="handleResetPassword()" id="lgResetBtn" class="btn mt-1">确认设置</button>
     </div>
 
-    <!-- 分隔线 -->
     <div class="flex items-center gap-3 my-5">
       <div class="line"></div>
       <span class="text-white/30 text-xs font-light whitespace-nowrap">其他方式</span>
       <div class="line"></div>
     </div>
 
-    <!-- 第三方登录 -->
     <div class="flex justify-center gap-4">
       <div class="ico" title="微信登录" onclick="toast('暂未开放')">
         <iconify-icon icon="ri:wechat-fill" width="22"></iconify-icon>
@@ -126,19 +122,17 @@
   </div>
 
   <script>
-    // ===== Supabase 配置 =====
-    const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
-    const _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
-    const _sb = supabase.createClient(_SB_URL, _SB_KEY);
-
-    // ===== Toast =====
-    const _tC = document.getElementById('tC');
+    const SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
+    const SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
+    const $ = id => document.getElementById(id);
+    const tC = $('tC');
 
     function toast(m) {
       const d = document.createElement('div');
       d.className = 'ti';
       d.textContent = m;
-      _tC.appendChild(d);
+      tC.appendChild(d);
       requestAnimationFrame(() => d.classList.add('sh'));
       setTimeout(() => {
         d.classList.remove('sh');
@@ -146,22 +140,20 @@
       }, 2500);
     }
 
-    // ===== 视图切换 =====
     function showView(id) {
       ['lgMain', 'lgForgot', 'lgReset'].forEach(v => {
-        const el = document.getElementById(v);
+        const el = $(v);
         if (el) el.classList.toggle('on', v === id);
       });
       ['lgMsg', 'lgForgotMsg', 'lgResetMsg'].forEach(id => {
-        const el = document.getElementById(id);
+        const el = $(id);
         if (el) { el.className = 'msg'; el.textContent = ''; }
       });
     }
 
-    // ===== 密码显示切换 =====
     function togglePsw() {
-      const p = document.getElementById('lgPsw');
-      const e = document.getElementById('lgEye');
+      const p = $('lgPsw');
+      const e = $('lgEye');
       if (p.type === 'password') {
         p.type = 'text';
         e.setAttribute('icon', 'lucide:eye');
@@ -171,7 +163,6 @@
       }
     }
 
-    // ===== 错误翻译=====
     function translateError(msg) {
       if (!msg) return '操作失败';
       const m = msg.toLowerCase();
@@ -180,9 +171,8 @@
       return msg;
     }
 
-    // ===== 设置消息 =====
     function setMsg(elId, msg, isErr) {
-      const el = document.getElementById(elId);
+      const el = $(elId);
       if (!el) return;
       if (!msg) { el.className = 'msg'; el.textContent = ''; return; }
       el.className = 'msg ' + (isErr ? 'err' : 'ok');
@@ -190,47 +180,32 @@
     }
 
     function setLoading(btnId, loading, text) {
-      const btn = document.getElementById(btnId);
+      const btn = $(btnId);
       if (!btn) return;
       btn.disabled = loading;
       btn.textContent = loading ? '请稍候…' : (text || '登录 / 注册');
     }
 
-    // ===== 登录 / 注册 =====
     async function handleEmailLogin() {
-      const email = document.getElementById('lgEmail').value.trim();
-      const pwd = document.getElementById('lgPsw').value;
-      
+      const email = $('lgEmail').value.trim();
+      const pwd = $('lgPsw').value;
       setMsg('lgMsg', '');
-      
-      if (!email || !pwd) { 
-        setMsg('lgMsg', '请填写邮箱和密码', true); 
-        return; 
-      }
-
+      if (!email || !pwd) { setMsg('lgMsg', '请填写邮箱和密码', true); return; }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        if (pwd.length < 6) {
-          setMsg('lgMsg', '邮箱或密码错误', true);
-        } else {
-          setMsg('lgMsg', '邮箱格式无效', true);
-        }
+        setMsg('lgMsg', pwd.length < 6 ? '邮箱或密码错误' : '邮箱格式无效', true);
         return;
       }
-
       setLoading('lgBtn', true);
-
-      let { data, error } = await _sb.auth.signInWithPassword({ email, password: pwd });
-
+      let { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
       if (error) {
         if (error.message.includes('Invalid login credentials') || error.message.includes('Email not confirmed')) {
-          const r = await _sb.auth.signUp({ email, password: pwd });
+          const r = await sb.auth.signUp({ email, password: pwd });
           if (r.error) {
             setMsg('lgMsg', translateError(r.error.message) || '注册失败', true);
           } else if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
             setMsg('lgMsg', '该邮箱已注册，请检查密码', true);
           } else {
-            // 注册成功（发送确认邮件）—— 不跳转，等待用户确认邮箱
             setMsg('lgMsg', '已发送！请前往邮箱确认', false);
             toast('注册成功，请查收邮件确认');
           }
@@ -240,33 +215,26 @@
         setLoading('lgBtn', false);
         return;
       }
-
-      // ✅ 登录成功 → 写入标记 → 跳转主页
       setLoading('lgBtn', false);
       if (data.user) {
         toast('登录成功，欢迎回来！');
-        // 写入时间戳标记，供主页检测同步
         localStorage.setItem('mugen_login_sync', Date.now().toString());
-        // 直接跳转，由主页检测标记并刷新数据
         window.location.href = 'index.html';
       } else {
         setMsg('lgMsg', '未知状态，请重试', true);
       }
     }
 
-    // ===== 忘记密码 =====
     async function handleForgotPassword() {
-      const email = document.getElementById('lgForgotEmail').value.trim();
+      const email = $('lgForgotEmail').value.trim();
       if (!email) { setMsg('lgForgotMsg', '请填写邮箱地址', true); return; }
-      const btn = document.getElementById('lgForgotBtn');
+      const btn = $('lgForgotBtn');
       btn.disabled = true;
       btn.textContent = '发送中…';
       setMsg('lgForgotMsg', '');
-
-      const { error } = await _sb.auth.resetPasswordForEmail(email, {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
         redirectTo: window.location.origin + window.location.pathname
       });
-
       btn.disabled = false;
       btn.textContent = '发送重置链接';
       if (error) {
@@ -278,23 +246,19 @@
       }
     }
 
-    // ===== 重置密码 =====
     async function handleResetPassword() {
-      const pw = document.getElementById('lgNewPsw').value;
+      const pw = $('lgNewPsw').value;
       if (!pw || pw.length < 6) { setMsg('lgResetMsg', '密码至少需要6位', true); return; }
-      const btn = document.getElementById('lgResetBtn');
+      const btn = $('lgResetBtn');
       btn.disabled = true;
       btn.textContent = '请稍候…';
       setMsg('lgResetMsg', '');
-
-      const { error } = await _sb.auth.updateUser({ password: pw });
-
+      const { error } = await sb.auth.updateUser({ password: pw });
       btn.disabled = false;
       btn.textContent = '确认设置';
       if (error) {
         setMsg('lgResetMsg', translateError(error.message) || '设置失败', true);
       } else {
-        // ✅ 重置密码成功 → 写入标记 → 跳转主页
         setMsg('lgResetMsg', '密码已更新', false);
         toast('密码已更新成功');
         localStorage.setItem('mugen_login_sync', Date.now().toString());
@@ -302,14 +266,10 @@
       }
     }
 
-    // ===== 检测重置密码链接 =====
     (function checkResetToken() {
       const hash = window.location.hash;
       if (hash && hash.includes('access_token')) {
-        setTimeout(() => {
-          showView('lgReset');
-          toast('请设置新密码');
-        }, 400);
+        setTimeout(() => { showView('lgReset'); toast('请设置新密码'); }, 400);
         try { history.replaceState(null, '', window.location.pathname); } catch (e) {}
       }
     })();
@@ -322,17 +282,12 @@
       }
     });
 
-    // ===== 键盘快捷键 =====
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
-        const reset = document.getElementById('lgReset');
-        if (reset && reset.classList.contains('on')) {
-          showView('lgMain');
-        }
+        const reset = $('lgReset');
+        if (reset && reset.classList.contains('on')) showView('lgMain');
       }
     });
-
-    console.log('登录页面已加载，handleEmailLogin 函数可用');
   </script>
 </body>
 </html>
