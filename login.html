@@ -11,7 +11,6 @@
   <style>
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景.jpg')center/cover no-repeat;z-index:0}
-    .bg-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.3);z-index:0;pointer-events:none;transition:opacity .25s ease}
     .glass{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.07);border-radius:14px;transition:background .25s ease,border-color .25s ease}
     .ipt{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#1a1a1a;transition:.3s;border-radius:14px;padding:14px 14px 14px 44px;width:100%;font-size:14px}
     .ipt::placeholder{color:rgba(0,0,0,0.35)}
@@ -19,12 +18,12 @@
     .btn{background:#1a1a1a;color:#fff;font-weight:600;transition:.3s;width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;font-size:14px}
     .btn:hover{background:rgba(0,0,0,0.85);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .ico{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:rgba(0,0,0,0.5);transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+    .ico{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#000;transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
     .ico:hover{background:rgba(255,255,255,0.6);border-color:rgba(0,0,0,0.15);color:#000;transform:translateY(-2px)}
     .line{flex:1;height:1px;background:rgba(0,0,0,0.12)}
     .field{position:relative;margin-bottom:14px}
-    .field .icn{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(0,0,0,0.35);pointer-events:none}
-    .psw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:rgba(0,0,0,0.35);cursor:pointer;transition:color .2s;background:0 0;border:none;padding:4px}
+    .field .icn{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#000;pointer-events:none}
+    .psw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#000;cursor:pointer;transition:color .2s;background:0 0;border:none;padding:4px}
     .psw-toggle:hover{color:rgba(0,0,0,0.7)}
     @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     .fu{animation:fu .6s ease-out both}
@@ -39,10 +38,10 @@
     .ti.sh{opacity:1;transform:translateY(0)}
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
     @media(max-width:768px){.glass{max-width:70vw;margin:0 auto;padding:12px 16px}}
-    .text-white{color:#1a1a1a}
-    .text-white\/40{color:rgba(0,0,0,0.5)}
+    .text-white{color:#000 !important}
+    .text-white\/40{color:#000 !important}
     .text-white\/25{color:rgba(0,0,0,0.4)}
-    .text-white\/30{color:rgba(0,0,0,0.45)}
+    .text-white\/30{color:#000 !important}
     .text-white\/45{color:rgba(0,0,0,0.45)}
 
     /* ===== 夜间模式覆盖 ===== */
@@ -102,7 +101,7 @@
       <div class="text-right mt-2">
         <span class="link" onclick="showView('lgForgot')">忘记密码？</span>
       </div>
-      <p class="text-center text-white/25 text-xs mt-4 font-light">登录即表示同意 <a href="#" class="text-white/45 hover:text-white/70 transition">服务条款</a> 与 <a href="#" class="text-white/45 hover:text-white/70 transition">隐私政策</a></p>
+      <p class="text-center text-black text-xs mt-4 font-light">登录即表示同意 <a href="#" class="text-white/45 hover:text-white/70 transition">服务条款</a> 与 <a href="#" class="text-white/45 hover:text-white/70 transition">隐私政策</a></p>
     </div>
 
     <div id="lgForgot" class="pg">
@@ -117,7 +116,7 @@
       </div>
       <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn mt-1">发送重置链接</button>
       <div class="text-center mt-3">
-        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.07);">← 返回登录</button>
+        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.07);">返回登录</button>
       </div>
     </div>
 
