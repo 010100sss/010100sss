@@ -11,58 +11,66 @@
   <style>
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景.jpg')center/cover no-repeat;z-index:0}
-    .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:0;pointer-events:none}
-    .glass{background:rgba(18,18,24,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.08);border-radius:14px}
-    .ipt{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;transition:.3s;border-radius:14px;padding:14px 14px 14px 44px;width:100%;font-size:14px}
-    .ipt::placeholder{color:rgba(255,255,255,.45)}
-    .ipt:focus{outline:none;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
-    .btn{background:#fff;color:#171717;font-weight:600;transition:.3s;width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;font-size:14px}
-    .btn:hover{background:rgba(255,255,255,.88);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    .bg-overlay{position:fixed;inset:0;background:rgba(255,255,255,0.3);z-index:0;pointer-events:none;transition:opacity .25s ease}
+    .glass{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.07);border-radius:14px;transition:background .25s ease,border-color .25s ease}
+    .ipt{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#1a1a1a;transition:.3s;border-radius:14px;padding:14px 14px 14px 44px;width:100%;font-size:14px}
+    .ipt::placeholder{color:rgba(0,0,0,0.35)}
+    .ipt:focus{outline:none;background:rgba(255,255,255,0.55);border-color:rgba(0,0,0,0.15);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+    .btn{background:#1a1a1a;color:#fff;font-weight:600;transition:.3s;width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;font-size:14px}
+    .btn:hover{background:rgba(0,0,0,0.85);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .ico{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
-    .ico:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff;transform:translateY(-2px)}
-    .line{flex:1;height:1px;background:rgba(255,255,255,.15)}
+    .ico{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:rgba(0,0,0,0.5);transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+    .ico:hover{background:rgba(255,255,255,0.6);border-color:rgba(0,0,0,0.15);color:#000;transform:translateY(-2px)}
+    .line{flex:1;height:1px;background:rgba(0,0,0,0.12)}
     .field{position:relative;margin-bottom:14px}
-    .field .icn{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.3);pointer-events:none}
-    .psw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.35);cursor:pointer;transition:color .2s;background:0 0;border:none;padding:4px}
-    .psw-toggle:hover{color:rgba(255,255,255,.7)}
+    .field .icn{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(0,0,0,0.35);pointer-events:none}
+    .psw-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:rgba(0,0,0,0.35);cursor:pointer;transition:color .2s;background:0 0;border:none;padding:4px}
+    .psw-toggle:hover{color:rgba(0,0,0,0.7)}
     @keyframes fu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     .fu{animation:fu .6s ease-out both}
     .msg{padding:10px 14px;border-radius:10px;font-size:13px;text-align:center;margin-bottom:12px;display:none}
-    .msg.err{display:block;background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)}
-    .msg.ok{display:block;background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.1)}
+    .msg.err{display:block;background:rgba(239,68,68,0.12);color:#dc2626;border:1px solid rgba(239,68,68,0.2)}
+    .msg.ok{display:block;background:rgba(0,0,0,0.06);color:rgba(0,0,0,0.6);border:1px solid rgba(0,0,0,0.08)}
     .pg{display:none}
     .pg.on{display:block}
-    .link{color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;transition:color .2s}
-    .link:hover{color:rgba(255,255,255,.7)}
-    .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(18,18,24,.92);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 24px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.3);white-space:nowrap;display:inline-block;margin-bottom:8px}
+    .link{color:rgba(0,0,0,0.4);font-size:12px;cursor:pointer;transition:color .2s}
+    .link:hover{color:rgba(0,0,0,0.7)}
+    .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(255,255,255,0.9);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:12px 24px;color:#1a1a1a;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.12);white-space:nowrap;display:inline-block;margin-bottom:8px}
     .ti.sh{opacity:1;transform:translateY(0)}
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
     @media(max-width:768px){.glass{max-width:70vw;margin:0 auto;padding:12px 16px}}
+    .text-white{color:#1a1a1a}
+    .text-white\/40{color:rgba(0,0,0,0.5)}
+    .text-white\/25{color:rgba(0,0,0,0.4)}
+    .text-white\/30{color:rgba(0,0,0,0.45)}
+    .text-white\/45{color:rgba(0,0,0,0.45)}
 
-    /* ===== 日间模式（完全仿照 index.html） ===== */
-    body.light-theme .bg-overlay{background:rgba(255,255,255,0.3)}
-    body.light-theme .glass{background:rgba(255,255,255,0.4);border-color:rgba(0,0,0,0.07)}
-    body.light-theme .ipt{background:rgba(255,255,255,0.4);border-color:rgba(0,0,0,0.07);color:#1a1a1a}
-    body.light-theme .ipt::placeholder{color:rgba(0,0,0,0.35)}
-    body.light-theme .ipt:focus{background:rgba(255,255,255,0.55);border-color:rgba(0,0,0,0.15)}
-    body.light-theme .field .icn{color:rgba(0,0,0,0.35)}
-    body.light-theme .psw-toggle{color:rgba(0,0,0,0.35)}
-    body.light-theme .psw-toggle:hover{color:rgba(0,0,0,0.7)}
-    body.light-theme .line{background:rgba(0,0,0,0.12)}
-    body.light-theme h1,body.light-theme h3{color:#1a1a1a}
-    body.light-theme .text-white{color:#1a1a1a}
-    body.light-theme p,body.light-theme .text-white\/40,body.light-theme .text-white\/25,body.light-theme .text-white\/30{color:rgba(0,0,0,0.5)}
-    body.light-theme .link{color:rgba(0,0,0,0.4)}
-    body.light-theme .link:hover{color:rgba(0,0,0,0.7)}
-    body.light-theme .ico{background:rgba(255,255,255,0.4);border-color:rgba(0,0,0,0.07);color:rgba(0,0,0,0.5)}
-    body.light-theme .ico:hover{background:rgba(255,255,255,0.6);color:#000}
-    body.light-theme .msg.ok{background:rgba(0,0,0,0.06);color:rgba(0,0,0,0.6);border-color:rgba(0,0,0,0.08)}
-    body.light-theme .msg.err{background:rgba(239,68,68,0.12);color:#dc2626;border-color:rgba(239,68,68,0.2)}
-    body.light-theme .ti{background:rgba(255,255,255,0.9);color:#1a1a1a;border-color:rgba(0,0,0,0.08)}
-    body.light-theme .btn{background:#1a1a1a;color:#fff}
-    body.light-theme .btn:hover{background:rgba(0,0,0,0.85)}
-    body.light-theme .btn:disabled{background:rgba(0,0,0,0.4)}
+    /* ===== 夜间模式覆盖 ===== */
+    body.dark-theme .bg-overlay{background:rgba(0,0,0,0.55)}
+    body.dark-theme .glass{background:rgba(18,18,24,0.4);border-color:rgba(255,255,255,.08)}
+    body.dark-theme .ipt{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:#fff}
+    body.dark-theme .ipt::placeholder{color:rgba(255,255,255,.45)}
+    body.dark-theme .ipt:focus{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);box-shadow:0 0 0 3px rgba(255,255,255,.06)}
+    body.dark-theme .field .icn{color:rgba(255,255,255,.3)}
+    body.dark-theme .psw-toggle{color:rgba(255,255,255,.35)}
+    body.dark-theme .psw-toggle:hover{color:rgba(255,255,255,.7)}
+    body.dark-theme .line{background:rgba(255,255,255,.15)}
+    body.dark-theme h1,body.dark-theme h3{color:#fff}
+    body.dark-theme .text-white{color:#fff}
+    body.dark-theme .text-white\/40{color:rgba(255,255,255,.4)}
+    body.dark-theme .text-white\/25{color:rgba(255,255,255,.25)}
+    body.dark-theme .text-white\/30{color:rgba(255,255,255,.3)}
+    body.dark-theme .text-white\/45{color:rgba(255,255,255,.45)}
+    body.dark-theme .link{color:rgba(255,255,255,.35)}
+    body.dark-theme .link:hover{color:rgba(255,255,255,.7)}
+    body.dark-theme .ico{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
+    body.dark-theme .ico:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff}
+    body.dark-theme .msg.ok{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.1)}
+    body.dark-theme .msg.err{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3)}
+    body.dark-theme .ti{background:rgba(18,18,24,.92);color:#fff;border-color:rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+    body.dark-theme .btn{background:#fff;color:#171717}
+    body.dark-theme .btn:hover{background:rgba(255,255,255,.88);box-shadow:0 8px 24px rgba(0,0,0,.15)}
+    body.dark-theme .btn:disabled{opacity:.6}
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
@@ -109,7 +117,7 @@
       </div>
       <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn mt-1">发送重置链接</button>
       <div class="text-center mt-3">
-        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(255,255,255,.35);border:1px solid rgba(255,255,255,.08);">← 返回登录</button>
+        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.07);">← 返回登录</button>
       </div>
     </div>
 
@@ -149,7 +157,7 @@
     // ===== 读取主题 =====
     try {
       const theme = JSON.parse(localStorage.getItem('mugen_theme'));
-      if (theme === 'light') document.body.classList.add('light-theme');
+      if (theme === 'dark') document.body.classList.add('dark-theme');
     } catch(e) {}
 
     const SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
