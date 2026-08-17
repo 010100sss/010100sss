@@ -1,155 +1,412 @@
-function saveToCache(k, v) { try { localStorage.setItem('mugen_' + k, JSON.stringify(v)) } catch (e) {} }
-function loadFromCache(k, d) { try { const v = localStorage.getItem('mugen_' + k); if (v !== null) return JSON.parse(v) } catch (e) {} return d }
-let R = [{
-    id: 999,
-    name: '空白测试资源',
-    cover: '',
-    size: '0MB',
-    time: '2026-08-17',
-    desc: '这是一个空白测试资源',
-    compat: '通用',
-    img1: '',
-    img2: '',
-    img3: '',
-    dl: '',
-    price: '',
-    fav: false,
-    paid: false
-}], updatesData = [], cP = 'home', sQ = '', _sTimer = null, _curUser = null, _fromPage = 'home';
-const _tC = document.getElementById('tC'), _ct = document.getElementById('ct'), _sI = document.getElementById('sI'), _sbMobile = document.getElementById('sbMobile'), _moOv = document.getElementById('moOv');
-let _navItems = null, _pages = null;
-function getNavItems() { if (!_navItems) _navItems = document.querySelectorAll('.n'); return _navItems }
-function getPages() { if (!_pages) _pages = document.querySelectorAll('.pg'); return _pages }
-function toast(m) { const d = document.createElement('div'); d.className = 'ti'; d.textContent = m; _tC.appendChild(d); requestAnimationFrame(() => d.classList.add('sh')); setTimeout(() => { d.classList.remove('sh'); setTimeout(() => d.remove(), 300) }, 2500) }
-function opM(id) { document.getElementById(id).classList.add('sh'); document.body.style.overflow = 'hidden' }
-function clM(id) { document.getElementById(id).classList.remove('sh'); document.body.style.overflow = '' }
-function cp(t) { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(() => toast('复制成功')).catch(() => fallbackCopy(t)) } else fallbackCopy(t) }
-function fallbackCopy(t) { try { const i = document.createElement('input'); i.value = t; i.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0'; document.body.appendChild(i); i.select(); document.execCommand('copy'); document.body.removeChild(i); toast('复制成功') } catch (e) { toast('复制失败，请手动复制') } }
-function updateThemeColor(isLight) { const meta = document.getElementById('themeColorMeta'); if (meta) meta.content = isLight ? '#f5f5f5' : '#0a0a0f' }
-function tgSw(el) { el.classList.toggle('on'); const isLight = el.classList.contains('on'); if (isLight) { document.body.classList.remove('light-theme'); saveToCache('theme', 'dark') } else { document.body.classList.add('light-theme'); saveToCache('theme', 'light') } updateThemeColor(!isLight); toast(isLight ? '夜间模式' : '日间模式') }
-function tgSB() { const isOpen = _sbMobile.classList.toggle('op'); _moOv.classList.toggle('sh', isOpen) }
-function openLoginPage() { window.location.href = 'login.html' }
-const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co', _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE', _sb = supabase.createClient(_SB_URL, _SB_KEY);
-async function handleLogout() {
-    const btns = document.querySelectorAll('#profileContent button');
-    let btn = null;
-    for (const b of btns) if (b.textContent.trim() === '退出账号') { btn = b; break; }
-    if (btn) { btn.disabled = true; btn.innerHTML = '<iconify-icon icon="lucide:loader-circle" width="15" class="animate-spin"></iconify-icon> 正在退出...'; }
-    await _sb.auth.signOut();
-    toast('已退出登录');
-    localStorage.removeItem('mugen_login_sync');
-    if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-}
-async function handleDeleteAccount() {
-    if (!_curUser) { toast('请先登录'); return; }
-    if (!confirm('确定要注销账号吗？此操作不可撤销，账号及所有数据将被永久删除。')) return;
-    toast('正在注销账号…');
-    const { error } = await _sb.rpc('delete_user');
-    if (error) { await _sb.auth.signOut(); toast('注销请求已提交，账号将被删除'); } else { await _sb.auth.signOut(); toast('账号已注销'); }
-    localStorage.removeItem('mugen_login_sync');
-    if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-}
-async function handleChangePassword() {
-    if (!_curUser) { toast('请先登录'); return; }
-    const pw = document.getElementById('chPwNew').value, cf = document.getElementById('chPwConf').value;
-    if (!pw || pw.length < 6) { setChPwMsg('新密码至少需要6位', true); return; }
-    if (pw !== cf) { setChPwMsg('两次密码不一致', true); return; }
-    const btn = document.getElementById('chPwBtn');
-    btn.disabled = true; btn.textContent = '请稍候…';
-    const { error } = await _sb.auth.updateUser({ password: pw });
-    btn.disabled = false; btn.textContent = '确认修改';
-    if (error) { setChPwMsg(error.message || '修改失败', true); } else { setChPwMsg('密码修改成功', false); document.getElementById('chPwNew').value = ''; document.getElementById('chPwConf').value = ''; setTimeout(() => { clM('chPwM'); setChPwMsg('', false); }, 1500); }
-}
-function setChPwMsg(msg, isErr) { const el = document.getElementById('chPwMsg'); if (!msg) { el.style.display = 'none'; return; } el.style.display = 'block'; el.style.background = isErr ? 'rgba(239,68,68,.15)' : 'rgba(255,255,255,.08)'; el.style.color = isErr ? '#f87171' : 'rgba(255,255,255,.7)'; el.style.border = isErr ? '1px solid rgba(239,68,68,.3)' : '1px solid rgba(255,255,255,.1)'; el.textContent = msg; }
-function applyUserData(favIds, paidIds) {
-    let changed = false;
-    R.forEach(item => { const nf = favIds.includes(item.id), np = paidIds.includes(item.id); if (nf !== item.fav || np !== item.paid) changed = true; item.fav = nf; item.paid = np; });
-    if (!changed) return;
-    if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP();
-}
-async function pushUserMeta() {
-    if (!_curUser) return;
-    const favIds = R.filter(item => item.fav).map(item => item.id), paidIds = R.filter(item => item.paid).map(item => item.id);
-    const { data, error } = await _sb.auth.updateUser({ data: { favs: favIds, paid: paidIds } });
-    if (!error && data?.user) _curUser = data.user;
-}
-function updateAuthUI(user) {
-    _curUser = user;
-    const icon = document.getElementById('hAvIcon'), letter = document.getElementById('hAvLetter'), pc = document.getElementById('profileContent');
-    if (user) {
-        const initial = (user.email || 'U')[0].toUpperCase();
-        if (icon) icon.classList.add('hidden');
-        if (letter) { letter.textContent = initial; letter.classList.remove('hidden'); }
-        if (pc) pc.innerHTML = `<div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-bold">${initial}</div><div class="text-center"><p class="text-white font-medium text-sm">${user.email}</p><p class="text-white/30 text-xs mt-0.5">已登录账户</p></div></div><div class="flex flex-col gap-2"><button onclick="if(!_curUser){toast('请先登录');return;}opM('chPwM')" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:key-round" width="15"></iconify-icon>修改密码</button><button onclick="handleLogout()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:log-out" width="15"></iconify-icon>退出账号</button><button onclick="handleDeleteAccount()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-red-500/10 text-red-400/70 hover:bg-red-500/20 transition flex items-center justify-center gap-2 mt-1"><iconify-icon icon="lucide:user-x" width="15"></iconify-icon>注销账号</button></div>`;
-        if (R.length) { const favIds = user.user_metadata?.favs || [], paidIds = user.user_metadata?.paid || []; applyUserData(favIds, paidIds); }
-    } else {
-        if (icon) icon.classList.remove('hidden');
-        if (letter) { letter.textContent = ''; letter.classList.add('hidden'); }
-        if (pc) pc.innerHTML = `<iconify-icon icon="lucide:user" width="48" class="text-white/20 mx-auto mb-4"></iconify-icon><p class="text-white/40 text-sm mb-6">登录后查看个人资料</p><button onclick="openLoginPage()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition">登录 / 注册</button>`;
-        if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); applyUserData([], []); }
-    }
-}
-(function checkLoginSync() {
-    const sync = localStorage.getItem('mugen_login_sync');
-    if (sync) {
-        localStorage.removeItem('mugen_login_sync');
-        setTimeout(async () => {
+const API_ENDPOINT_WITH_SIGNATURE = 'https://vdownload.2tech.top/vdownload/parse/parseUrlWithSignature';
+const SECRET_KEY = 'vdownload_secret_key_2024';
+
+// 批量下载图片功能
+async function batchDownloadImages(imageUrls, title) {
+    const batchBtn = document.getElementById('batch-download-btn');
+    const originalText = batchBtn.textContent;
+    
+    try {
+        batchBtn.disabled = true;
+        batchBtn.textContent = '正在下载...';
+        
+        let successCount = 0;
+        let failCount = 0;
+        
+        for (let i = 0; i < imageUrls.length; i++) {
             try {
-                const { data: { session } } = await _sb.auth.getSession();
-                if (session) { updateAuthUI(session.user); toast('登录成功'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-                else { setTimeout(async () => { const { data: { session: s2 } } = await _sb.auth.getSession(); if (s2) { updateAuthUI(s2.user); toast('登录成功'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); } }, 500); }
-            } catch (e) {}
-        }, 300);
+                batchBtn.textContent = `正在下载... (${i + 1}/${imageUrls.length})`;
+                
+                const response = await fetch(imageUrls[i]);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                const extension = blob.type.split('/')[1] || 'jpg';
+                const fileName = `${title || '图片'}_${i + 1}.${extension}`;
+                link.download = fileName;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                
+                successCount++;
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+            } catch (error) {
+                console.error(`下载第${i + 1}张图片失败:`, error);
+                failCount++;
+            }
+        }
+        
+        if (failCount === 0) {
+            batchBtn.textContent = `下载完成! (${successCount}张)`;
+            batchBtn.style.backgroundColor = '#4CAF50';
+        } else {
+            batchBtn.textContent = `下载完成! 成功:${successCount}张, 失败:${failCount}张`;
+            batchBtn.style.backgroundColor = '#FF9800';
+        }
+        
+        setTimeout(() => {
+            batchBtn.disabled = false;
+            batchBtn.textContent = originalText;
+            batchBtn.style.backgroundColor = '';
+        }, 3000);
+        
+    } catch (error) {
+        console.error('批量下载失败:', error);
+        batchBtn.textContent = '下载失败，请重试';
+        batchBtn.style.backgroundColor = '#f44336';
+        batchBtn.disabled = false;
+        
+        setTimeout(() => {
+            batchBtn.textContent = originalText;
+            batchBtn.style.backgroundColor = '';
+        }, 3000);
     }
-})();
-_sb.auth.onAuthStateChange((_event, session) => { if (_event === 'PASSWORD_RECOVERY') { toast('请前往登录页面重置密码'); window.location.href = 'login.html'; } updateAuthUI(session ? session.user : null); });
-_sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? session.user : null); if (session && localStorage.getItem('mugen_needProfile')) { localStorage.removeItem('mugen_needProfile'); setTimeout(() => go('profile'), 200); } });
-window.addEventListener('storage', function(e) { if (e.key === 'mugen_login_sync' && e.newValue) { _sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? session.user : null); if (session) { toast('登录成功'); localStorage.removeItem('mugen_login_sync'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); } }); } });
-function go(p) { if (cP !== 'detail') _fromPage = cP; cP = p; getNavItems().forEach(n => n.classList.toggle('on', n.dataset.p === p)); getPages().forEach(el => el.classList.remove('on')); const target = document.getElementById('p-' + p); if (target) target.classList.add('on'); _sI.value = ''; sQ = ''; if (p === 'home') rH(); if (p === 'fav') rF(); if (p === 'purchased') rP(); if (p === 'updates') rU(); _ct.scrollTop = 0; if (window.innerWidth <= 768 && _sbMobile.classList.contains('op')) tgSB() }
-function doS() { clearTimeout(_sTimer); _sTimer = setTimeout(() => { sQ = _sI.value.trim().toLowerCase(); if (cP !== 'home') go('home'); rH() }, 300) }
-function cHTML(r, sp) { const fc = r.fav ? 'on' : ''; let pt = ''; if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>'; return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})"><div class="db w-20 h-20 flex-shrink-0"><img src="${r.cover||''}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div><div class="flex-1 min-w-0"><div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div><p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p></div><div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()"><span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="18"></iconify-icon></span><button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button></div></div>` }
-function renderList(gId, eId, filter) { let items = R.filter(filter); items.sort((a, b) => (b.time || '').localeCompare(a.time || '')); const g = document.getElementById(gId), e = document.getElementById(eId); if (!g || !e) return; if (items.length) { g.innerHTML = items.map(r => cHTML(r, false)).join(''); g.classList.remove('hidden'); e.classList.add('hidden'); e.classList.remove('flex') } else { g.classList.add('hidden'); e.classList.remove('hidden'); e.classList.add('flex') } const tc = document.getElementById('totalCount'); if (tc) tc.textContent = R.length }
-function rH() { renderList('hG', 'hE', r => sQ ? r.name.toLowerCase().includes(sQ) : true) }
-function rF() { renderList('fvG', 'fvE', r => r.fav) }
-function rP() { renderList('puG', 'puE', r => r.paid) }
-function rU() { const list = document.getElementById('upL'); if (!list) return; if (updatesData.length) { const sorted = [...updatesData].sort((a, b) => b.d.localeCompare(a.d)); list.innerHTML = sorted.map(x => `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`).join('') } }
-function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; } r.fav = !r.fav; toast(r.fav ? '已收藏' : '已取消收藏'); document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav)); const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav); pushUserMeta(); if (cP === 'fav') rF() }
-function goDt(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) { toast('资源不存在'); return }
-    if (cP !== 'detail') _fromPage = cP;
-    document.getElementById('dtC').innerHTML = `<div class="glass rounded-2xl overflow-hidden"><div class="grid grid-cols-1 sm:grid-cols-3 gap-0"><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img1||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片1</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img2||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片2</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img3||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片3</span>'"></div></div><div class="p-6 md:p-8"><h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2><div class="flex flex-wrap gap-2 mb-5"><span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span><span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span><span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span></div><div class="mb-6"><h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3><p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p></div><div class="flex items-center gap-3"><span class="ht ${r.fav?'on':''} text-lg" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="20"></iconify-icon></span><button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button></div></div></div>`;
-    cP = 'detail'; getPages().forEach(el => el.classList.remove('on')); document.getElementById('p-detail').classList.add('on'); _ct.scrollTop = 0
 }
-const _enablePaidDownload = false;
-function opD(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) return;
-    if (_enablePaidDownload) {
-        if (r.paid) { document.getElementById('dlB').innerHTML = `<div class="flex items-center gap-3 p-4 rounded-xl bg-white/5"><div class="flex-1 min-w-0"><p class="text-white/40 text-xs mb-1">下载链接</p><p class="text-white text-sm truncate">${r.dl||''}</p></div><button onclick="cp('${r.dl||''}')" class="copy-btn text-xs text-white/50 hover:text-white/80 transition px-3 py-1.5 rounded-lg bg-white/8 hover:bg-white/15">复制</button></div>`; opM('dlM'); return; }
-        document.getElementById('dlB').innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div class="p-4 rounded-xl bg-white/5 flex flex-col items-center"><p class="text-white/60 text-xs font-medium mb-3">付费下载</p><img src="固定图片/收款码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white text-lg font-semibold mb-3">${r.price||'¥0'}</p><button onclick="mkPd(${r.id})" class="w-full py-2 rounded-xl text-sm font-medium bg-white/15 text-white hover:bg-white/25 transition">我已付费</button></div><div class="p-4 rounded-xl bg-white/5 flex flex-col items-center"><p class="text-white/60 text-xs font-medium mb-3">免费下载</p><img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p><button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button></div></div>`;
-    } else {
-        document.getElementById('dlB').innerHTML = `<div class="flex flex-col items-center p-4 rounded-xl bg-white/5"><p class="text-white/60 text-xs font-medium mb-3">免费下载</p><img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p><button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button></div>`;
+
+// 检测平台类型
+function detectPlatform(url) {
+    if (url.includes('douyin.com') || url.includes('iesdouyin.com')) return 'douyin';
+    if (url.includes('kuaishou.com')) return 'kuaishou';
+    if (url.includes('xiaohongshu.com') || url.includes('xhslink.com')) return 'xiaohongshu';
+    if (url.includes('bilibili.com')) return 'bilibili';
+    if (url.includes('weibo.com')) return 'weibo';
+    if (url.includes('pipix.com')) return 'pipix';
+    if (url.includes('tiktok.com')) return 'tiktok';
+    if (url.includes('instagram.com')) return 'instagram';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
+    if (url.includes('facebook.com')) return 'facebook';
+    if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter';
+    return 'unknown';
+}
+
+const input = document.getElementById('input-url');
+const btn = document.getElementById('btn-parse');
+const result = document.getElementById('result');
+const errorBox = document.getElementById('error');
+const loading = document.getElementById('loading');
+
+function setLoading(state) {
+    loading.style.display = state ? 'block' : 'none';
+    btn.disabled = state;
+}
+
+function showError(msg) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = msg;
+}
+
+function clearError() {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+}
+
+/**
+ * 生成MD5签名
+ * @param {string} str 待签名字符串
+ * @returns {string} MD5签名
+ */
+function md5(str) {
+    // 简单的MD5实现
+    function rotateLeft(lValue, iShiftBits) {
+        return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
     }
-    opM('dlM')
-}
-function mkPd(id) { const r = R.find(item => item.id === id); if (!r) { toast('资源不存在'); return } if (r.paid) { toast('该资源已付费'); return } r.paid = true; clM('dlM'); toast('付费成功'); pushUserMeta(); rP(); opD(id) }
-function restoreCache() {
-    const theme = loadFromCache('theme', 'light'), toggle = document.getElementById('themeToggle');
-    let isLight = false;
-    if (theme === 'light') { toggle.classList.remove('on'); document.body.classList.add('light-theme'); isLight = true; } else { toggle.classList.add('on'); document.body.classList.remove('light-theme'); }
-    updateThemeColor(isLight);
-    try { localStorage.removeItem('mugen_favs'); localStorage.removeItem('mugen_paid'); } catch (e) {}
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { clM('dlM'); clM('spM'); clM('anM'); clM('chPwM'); } });
-restoreCache();
-fetch('data.json').then(res => res.json()).then(data => { 
-    if (data.resources && data.resources.length) {
-        R = data.resources;
+
+    function addUnsigned(lX, lY) {
+        const lX4 = (lX & 0x40000000);
+        const lY4 = (lY & 0x40000000);
+        const lX8 = (lX & 0x80000000);
+        const lY8 = (lY & 0x80000000);
+        const lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
+        if (lX4 & lY4) {
+            return (lResult ^ 0x80000000 ^ lX8 ^ lY8);
+        }
+        if (lX4 | lY4) {
+            if (lResult & 0x40000000) {
+                return (lResult ^ 0xC0000000 ^ lX8 ^ lY8);
+            } else {
+                return (lResult ^ 0x40000000 ^ lX8 ^ lY8);
+            }
+        } else {
+            return (lResult ^ lX8 ^ lY8);
+        }
     }
-    updatesData = data.updates || []; 
-    if (_curUser) { const favIds = _curUser.user_metadata?.favs || [], paidIds = _curUser.user_metadata?.paid || []; R.forEach(item => { if (favIds.includes(item.id)) item.fav = true; if (paidIds.includes(item.id)) item.paid = true }); } 
-    if (!R.length) toast('暂无资源'); 
-    rH() 
-}).catch(() => { toast('加载失败'); rH() });
-opM('anM');
+
+    function F(x, y, z) { return (x & y) | ((~x) & z); }
+    function G(x, y, z) { return (x & z) | (y & (~z)); }
+    function H(x, y, z) { return (x ^ y ^ z); }
+    function I(x, y, z) { return (y ^ (x | (~z))); }
+
+    function FF(a, b, c, d, x, s, ac) {
+        a = addUnsigned(a, addUnsigned(addUnsigned(F(b, c, d), x), ac));
+        return addUnsigned(rotateLeft(a, s), b);
+    }
+
+    function GG(a, b, c, d, x, s, ac) {
+        a = addUnsigned(a, addUnsigned(addUnsigned(G(b, c, d), x), ac));
+        return addUnsigned(rotateLeft(a, s), b);
+    }
+
+    function HH(a, b, c, d, x, s, ac) {
+        a = addUnsigned(a, addUnsigned(addUnsigned(H(b, c, d), x), ac));
+        return addUnsigned(rotateLeft(a, s), b);
+    }
+
+    function II(a, b, c, d, x, s, ac) {
+        a = addUnsigned(a, addUnsigned(addUnsigned(I(b, c, d), x), ac));
+        return addUnsigned(rotateLeft(a, s), b);
+    }
+
+    function convertToWordArray(str) {
+        let lWordCount;
+        const lMessageLength = str.length;
+        const lNumberOfWords_temp1 = lMessageLength + 8;
+        const lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
+        const lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16;
+        const lWordArray = new Array(lNumberOfWords - 1);
+        let lBytePosition = 0;
+        let lByteCount = 0;
+        while (lByteCount < lMessageLength) {
+            lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+            lBytePosition = (lByteCount % 4) * 8;
+            lWordArray[lWordCount] = (lWordArray[lWordCount] | (str.charCodeAt(lByteCount) << lBytePosition));
+            lByteCount++;
+        }
+        lWordCount = (lByteCount - (lByteCount % 4)) / 4;
+        lBytePosition = (lByteCount % 4) * 8;
+        lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
+        lWordArray[lNumberOfWords - 2] = lMessageLength << 3;
+        lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
+        return lWordArray;
+    }
+
+    function wordToHex(lValue) {
+        let wordToHexValue = "";
+        let wordToHexValue_temp = "";
+        let lByte, lCount;
+        for (lCount = 0; lCount <= 3; lCount++) {
+            lByte = (lValue >>> (lCount * 8)) & 255;
+            wordToHexValue_temp = "0" + lByte.toString(16);
+            wordToHexValue = wordToHexValue + wordToHexValue_temp.substr(wordToHexValue_temp.length - 2, 2);
+        }
+        return wordToHexValue;
+    }
+
+    function utf8Encode(str) {
+        str = str.replace(/\r\n/g, "\n");
+        let utftext = "";
+        for (let n = 0; n < str.length; n++) {
+            const c = str.charCodeAt(n);
+            if (c < 128) {
+                utftext += String.fromCharCode(c);
+            } else if ((c > 127) && (c < 2048)) {
+                utftext += String.fromCharCode((c >> 6) | 192);
+                utftext += String.fromCharCode((c & 63) | 128);
+            } else {
+                utftext += String.fromCharCode((c >> 12) | 224);
+                utftext += String.fromCharCode(((c >> 6) & 63) | 128);
+                utftext += String.fromCharCode((c & 63) | 128);
+            }
+        }
+        return utftext;
+    }
+
+    let x = convertToWordArray(utf8Encode(str));
+    let a = 0x67452301;
+    let b = 0xEFCDAB89;
+    let c = 0x98BADCFE;
+    let d = 0x10325476;
+
+    for (let k = 0; k < x.length; k += 16) {
+        const AA = a, BB = b, CC = c, DD = d;
+        a = FF(a, b, c, d, x[k + 0], 7, 0xD76AA478);
+        d = FF(d, a, b, c, x[k + 1], 12, 0xE8C7B756);
+        c = FF(c, d, a, b, x[k + 2], 17, 0x242070DB);
+        b = FF(b, c, d, a, x[k + 3], 22, 0xC1BDCEEE);
+        a = FF(a, b, c, d, x[k + 4], 7, 0xF57C0FAF);
+        d = FF(d, a, b, c, x[k + 5], 12, 0x4787C62A);
+        c = FF(c, d, a, b, x[k + 6], 17, 0xA8304613);
+        b = FF(b, c, d, a, x[k + 7], 22, 0xFD469501);
+        a = FF(a, b, c, d, x[k + 8], 7, 0x698098D8);
+        d = FF(d, a, b, c, x[k + 9], 12, 0x8B44F7AF);
+        c = FF(c, d, a, b, x[k + 10], 17, 0xFFFF5BB1);
+        b = FF(b, c, d, a, x[k + 11], 22, 0x895CD7BE);
+        a = FF(a, b, c, d, x[k + 12], 7, 0x6B901122);
+        d = FF(d, a, b, c, x[k + 13], 12, 0xFD987193);
+        c = FF(c, d, a, b, x[k + 14], 17, 0xA679438E);
+        b = FF(b, c, d, a, x[k + 15], 22, 0x49B40821);
+        a = GG(a, b, c, d, x[k + 1], 5, 0xF61E2562);
+        d = GG(d, a, b, c, x[k + 6], 9, 0xC040B340);
+        c = GG(c, d, a, b, x[k + 11], 14, 0x265E5A51);
+        b = GG(b, c, d, a, x[k + 0], 20, 0xE9B6C7AA);
+        a = GG(a, b, c, d, x[k + 5], 5, 0xD62F105D);
+        d = GG(d, a, b, c, x[k + 10], 9, 0x2441453);
+        c = GG(c, d, a, b, x[k + 15], 14, 0xD8A1E681);
+        b = GG(b, c, d, a, x[k + 4], 20, 0xE7D3FBC8);
+        a = GG(a, b, c, d, x[k + 9], 5, 0x21E1CDE6);
+        d = GG(d, a, b, c, x[k + 14], 9, 0xC33707D6);
+        c = GG(c, d, a, b, x[k + 3], 14, 0xF4D50D87);
+        b = GG(b, c, d, a, x[k + 8], 20, 0x455A14ED);
+        a = GG(a, b, c, d, x[k + 13], 5, 0xA9E3E905);
+        d = GG(d, a, b, c, x[k + 2], 9, 0xFCEFA3F8);
+        c = GG(c, d, a, b, x[k + 7], 14, 0x676F02D9);
+        b = GG(b, c, d, a, x[k + 12], 20, 0x8D2A4C8A);
+        a = HH(a, b, c, d, x[k + 5], 4, 0xFFFA3942);
+        d = HH(d, a, b, c, x[k + 8], 11, 0x8771F681);
+        c = HH(c, d, a, b, x[k + 11], 16, 0x6D9D6122);
+        b = HH(b, c, d, a, x[k + 14], 23, 0xFDE5380C);
+        a = HH(a, b, c, d, x[k + 1], 4, 0xA4BEEA44);
+        d = HH(d, a, b, c, x[k + 4], 11, 0x4BDECFA9);
+        c = HH(c, d, a, b, x[k + 7], 16, 0xF6BB4B60);
+        b = HH(b, c, d, a, x[k + 10], 23, 0xBEBFBC70);
+        a = HH(a, b, c, d, x[k + 13], 4, 0x289B7EC6);
+        d = HH(d, a, b, c, x[k + 0], 11, 0xEAA127FA);
+        c = HH(c, d, a, b, x[k + 3], 16, 0xD4EF3085);
+        b = HH(b, c, d, a, x[k + 6], 23, 0x4881D05);
+        a = HH(a, b, c, d, x[k + 9], 4, 0xD9D4D039);
+        d = HH(d, a, b, c, x[k + 12], 11, 0xE6DB99E5);
+        c = HH(c, d, a, b, x[k + 15], 16, 0x1FA27CF8);
+        b = HH(b, c, d, a, x[k + 2], 23, 0xC4AC5665);
+        a = II(a, b, c, d, x[k + 0], 6, 0xF4292244);
+        d = II(d, a, b, c, x[k + 7], 10, 0x432AFF97);
+        c = II(c, d, a, b, x[k + 14], 15, 0xAB9423A7);
+        b = II(b, c, d, a, x[k + 5], 21, 0xFC93A039);
+        a = II(a, b, c, d, x[k + 12], 6, 0x655B59C3);
+        d = II(d, a, b, c, x[k + 3], 10, 0x8F0CCC92);
+        c = II(c, d, a, b, x[k + 10], 15, 0xFFEFF47D);
+        b = II(b, c, d, a, x[k + 1], 21, 0x85845DD1);
+        a = II(a, b, c, d, x[k + 8], 6, 0x6FA87E4F);
+        d = II(d, a, b, c, x[k + 15], 10, 0xFE2CE6E0);
+        c = II(c, d, a, b, x[k + 6], 15, 0xA3014314);
+        b = II(b, c, d, a, x[k + 13], 21, 0x4E0811A1);
+        a = II(a, b, c, d, x[k + 4], 6, 0xF7537E82);
+        d = II(d, a, b, c, x[k + 11], 10, 0xBD3AF235);
+        c = II(c, d, a, b, x[k + 2], 15, 0x2AD7D2BB);
+        b = II(b, c, d, a, x[k + 9], 21, 0xEB86D391);
+        a = addUnsigned(a, AA);
+        b = addUnsigned(b, BB);
+        c = addUnsigned(c, CC);
+        d = addUnsigned(d, DD);
+    }
+
+    const temp = wordToHex(a) + wordToHex(b) + wordToHex(c) + wordToHex(d);
+    return temp.toLowerCase();
+}
+
+/**
+ * 生成签名
+ * @param {string} url 请求的URL
+ * @param {number} timestamp 时间戳
+ * @returns {string} 签名字符串
+ */
+function generateSignature(url, timestamp) {
+    const signStr = `url=${url}&timestamp=${timestamp}&key=${SECRET_KEY}`;
+    return md5(signStr);
+}
+
+function renderResultFromBackend(payload) {
+    if (!payload || typeof payload !== 'object') {
+        result.innerHTML = '<div class="hint">响应为空</div>';
+        return;
+    }
+    const { erroCode, erroMsg, result: data } = payload;
+    if (erroCode !== 2000 || !data) {
+        result.innerHTML = `<div class="error">${erroMsg || '解析失败'}</div>`;
+        return;
+    }
+
+    const title = data.title || '';
+    const cover = data.image || '';
+    const videoUrl = data.video || '';
+    const atlas = Array.isArray(data.atlas) ? data.atlas : [];
+
+    if (videoUrl) {
+        result.innerHTML = `
+            <div>
+                <div style="margin:8px 0">${title}</div>
+                <div class="item">
+                    <video controls src="${videoUrl}" ${cover ? `poster="${cover}"` : ''}></video>
+                    <a class="dl" href="${videoUrl}" target="_blank" download>下载视频</a>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    if (atlas.length > 0) {
+        const imgs = atlas.map((u, idx) => `
+            <div class="item">
+                <img src="${u}" />
+                <a class="dl" href="${u}" target="_blank" download>下载第${idx + 1}张</a>
+            </div>
+        `).join('');
+        result.innerHTML = `
+            <div>
+                <div style="margin:8px 0">${title}</div>
+                <div style="margin:8px 0">
+                    <button id="batch-download-btn" class="batch-download-btn">批量下载全部图片 (${atlas.length}张)</button>
+                </div>
+                <div class="grid">${imgs}</div>
+            </div>
+        `;
+        
+        const batchBtn = document.getElementById('batch-download-btn');
+        batchBtn.addEventListener('click', () => batchDownloadImages(atlas, title));
+        return;
+    }
+
+    result.innerHTML = '<div class="hint">未解析到视频或图集</div>';
+}
+
+btn.addEventListener('click', async () => {
+    clearError();
+    result.innerHTML = '';
+    const url = (input.value || '').trim();
+    
+    if (!url) {
+        showError('请输入分享链接');
+        return;
+    }
+
+    const endpoint = API_ENDPOINT_WITH_SIGNATURE;
+
+    if (!endpoint) {
+        showError('未配置后端接口地址');
+        return;
+    }
+
+    setLoading(true);
+    try {
+        let headers = {
+            'Content-Type': 'application/json'
+        };
+
+        const timestamp = Date.now();
+        const signature = generateSignature(url, timestamp);
+        headers['timestamp'] = timestamp.toString();
+        headers['signature'] = signature;
+
+        const resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ url })
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+            throw new Error(data?.erroMsg || `请求失败(${resp.status})`);
+        }
+        renderResultFromBackend(data);
+    } catch (e) {
+        showError(e.message || '解析失败');
+    } finally {
+        setLoading(false);
+    }
+});
