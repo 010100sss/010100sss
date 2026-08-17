@@ -25,15 +25,6 @@ async function handleLogout() {
     localStorage.removeItem('mugen_login_sync');
     if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
 }
-async function handleDeleteAccount() {
-    if (!_curUser) { toast('请先登录'); return; }
-    if (!confirm('确定要注销账号吗？此操作不可撤销，账号及所有数据将被永久删除。')) return;
-    toast('正在注销账号…');
-    const { error } = await _sb.rpc('delete_user');
-    if (error) { await _sb.auth.signOut(); toast('注销请求已提交，账号将被删除'); } else { await _sb.auth.signOut(); toast('账号已注销'); }
-    localStorage.removeItem('mugen_login_sync');
-    if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-}
 async function handleChangePassword() {
     if (!_curUser) { toast('请先登录'); return; }
     const pw = document.getElementById('chPwNew').value, cf = document.getElementById('chPwConf').value;
@@ -65,7 +56,7 @@ function updateAuthUI(user) {
         const initial = (user.email || 'U')[0].toUpperCase();
         if (icon) icon.classList.add('hidden');
         if (letter) { letter.textContent = initial; letter.classList.remove('hidden'); }
-        if (pc) pc.innerHTML = `<div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-bold">${initial}</div><div class="text-center"><p class="text-white font-medium text-sm">${user.email}</p><p class="text-white/30 text-xs mt-0.5">已登录账户</p></div></div><div class="flex flex-col gap-2"><button onclick="if(!_curUser){toast('请先登录');return;}opM('chPwM')" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:key-round" width="15"></iconify-icon>修改密码</button><button onclick="handleLogout()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:log-out" width="15"></iconify-icon>退出账号</button><button onclick="handleDeleteAccount()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-red-500/10 text-red-400/70 hover:bg-red-500/20 transition flex items-center justify-center gap-2 mt-1"><iconify-icon icon="lucide:user-x" width="15"></iconify-icon>注销账号</button></div>`;
+        if (pc) pc.innerHTML = `<div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-bold">${initial}</div><div class="text-center"><p class="text-white font-medium text-sm">${user.email}</p><p class="text-white/30 text-xs mt-0.5">已登录账户</p></div></div><div class="flex flex-col gap-2"><button onclick="if(!_curUser){toast('请先登录');return;}opM('chPwM')" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:key-round" width="15"></iconify-icon>修改密码</button><button onclick="handleLogout()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:log-out" width="15"></iconify-icon>退出账号</button></div>`;
         if (R.length) { const favIds = user.user_metadata?.favs || [], paidIds = user.user_metadata?.paid || []; applyUserData(favIds, paidIds); }
     } else {
         if (icon) icon.classList.remove('hidden');
