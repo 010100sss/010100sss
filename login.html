@@ -11,9 +11,11 @@
   <style>
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景-电脑.jpg')center/cover no-repeat;z-index:0}
-@media (max-width:768px){
-    .bg-img{background:url('固定图片/登录背景-手机.jpg')center/cover no-repeat}
-}
+    .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:0;pointer-events:none;opacity:0;transition:opacity .25s ease}
+    body:not(.dark-theme) .bg-overlay{opacity:1}
+    @media (max-width:768px){
+        .bg-img{background:url('固定图片/登录背景-手机.jpg')center/cover no-repeat}
+    }
     .glass{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.07);border-radius:12px;transition:background .25s ease,border-color .25s ease;padding:24px}
     .ipt{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#1a1a1a;transition:none;border-radius:12px;padding:12px 14px 12px 40px;width:100%;font-size:14px}
     .ipt::placeholder{color:rgba(0,0,0,0.35)}
