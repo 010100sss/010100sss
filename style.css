@@ -7,7 +7,7 @@ body { font-family: Inter, sans-serif; overflow: hidden; height: 100vh; backgrou
 .bg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease }
 body:not(.light-theme) .bg-overlay { opacity: 1 }
 .app-wrap { position: relative; z-index: 1; background: rgba(18,18,24,.15); height: 100vh; width: 100vw; overflow: hidden }
-.sidebar-desktop, .sidebar-mobile, .glass, .glass-side { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
+.sidebar-desktop, .sidebar-mobile, .c, .glass, .glass-side { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
 .glass { background: rgba(18,18,24,.4); border: 1px solid rgba(255,255,255,.05) }
 .glass-side { background: rgba(12,12,18,.3); border: 1px solid rgba(255,255,255,.05); border-radius: 20px; margin: 10px; height: calc(100% - 20px); box-shadow: 0 4px 24px rgba(0,0,0,.25) }
 .c { background: rgba(22,22,30,.3); border: 1px solid rgba(255,255,255,.05); border-radius: 14px; transition: transform .2s ease, background .2s ease; cursor: pointer; contain: layout; will-change: transform }
