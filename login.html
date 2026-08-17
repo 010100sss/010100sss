@@ -12,7 +12,7 @@
     body{font-family:'Inter',sans-serif}
     .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景-电脑.jpg')center/cover no-repeat;z-index:0}
     .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:0;pointer-events:none;opacity:0;transition:opacity .25s ease}
-    body:not(.dark-theme) .bg-overlay{opacity:1}
+    body.dark-theme .bg-overlay{opacity:1}
     @media (max-width:768px){
         .bg-img{background:url('固定图片/登录背景-手机.jpg')center/cover no-repeat}
     }
