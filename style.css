@@ -6,7 +6,8 @@ body { font-family: Inter, sans-serif; overflow: hidden; height: 100vh; backgrou
 }
 .bg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease }
 body:not(.light-theme) .bg-overlay { opacity: 1 }
-.app-wrap { position: relative; z-index: 1; background: rgba(18,18,24,.15); height: 100vh; width: 100vw; overflow: hidden }
+.app-wrap { position: relative; z-index: 1; height: 100vh; width: 100vw; overflow: hidden }
+body:not(.light-theme) .app-wrap { background: rgba(18,18,24,.15) }
 .sidebar-desktop, .sidebar-mobile, .c, .glass, .glass-side { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
 .glass { background: rgba(18,18,24,.4); border: 1px solid rgba(255,255,255,.05) }
 .glass-side { background: rgba(12,12,18,.3); border: 1px solid rgba(255,255,255,.05); border-radius: 20px; margin: 10px; height: calc(100% - 20px); box-shadow: 0 4px 24px rgba(0,0,0,.25) }
@@ -67,7 +68,7 @@ header.glass { margin: 10px 10px 0 10px; border-radius: 20px; border: 1px solid 
 .light-theme .ht:hover { background: rgba(0,0,0,.06) !important }
 .light-theme .ht:active { background: rgba(0,0,0,.08) !important }
 .light-theme .ht.on:hover { background: rgba(251,191,36,.15) !important }
-.light-theme .app-wrap { background: rgba(255,255,255,.3) !important }
+.light-theme .app-wrap { background: transparent !important }
 .light-theme .glass-side { box-shadow: 0 4px 24px rgba(0,0,0,.06) }
 .light-theme .ti { background: rgba(255,255,255,.9) !important; color: #1a1a1a !important; border-color: rgba(0,0,0,.08) !important }
 .light-theme .n { color: #1a1a1a !important; background: transparent !important }
