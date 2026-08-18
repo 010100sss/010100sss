@@ -4,17 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录 / 注册</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     body{font-family:'Inter',sans-serif}
-    .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景-电脑.jpg')center/cover no-repeat;z-index:0}
+    .bg-img{position:fixed;inset:0;background:url('固定图片/登录背景-电脑-v1.jpg')center/cover no-repeat;z-index:0}
     .bg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:0;pointer-events:none;opacity:0;transition:opacity .25s ease}
     body.dark-theme .bg-overlay{opacity:1}
     @media (max-width:768px){
-        .bg-img{background:url('固定图片/登录背景-手机.jpg')center/cover no-repeat}
+        .bg-img{background:url('固定图片/登录背景-手机-v1.jpg')center/cover no-repeat}
     }
     .glass{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.07);border-radius:12px;transition:background .25s ease,border-color .25s ease;padding:24px}
     .ipt{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#1a1a1a;transition:none;border-radius:12px;padding:12px 14px 12px 40px;width:100%;font-size:14px}
@@ -23,6 +26,10 @@
     .btn{background:#1a1a1a;color:#fff;font-weight:600;transition:.3s;width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;font-size:14px}
     .btn:hover{background:rgba(0,0,0,0.85);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,.15)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-transparent{background:transparent;color:#000;border:1px solid rgba(0,0,0,0.12);width:100%;padding:13px;border-radius:12px;cursor:pointer;font-size:14px;font-weight:600;transition:.3s}
+    .btn-transparent:hover{background:rgba(0,0,0,0.05);transform:translateY(-1px)}
+    body.dark-theme .btn-transparent{color:#fff;border-color:rgba(255,255,255,0.2)}
+    body.dark-theme .btn-transparent:hover{background:rgba(255,255,255,0.08)}
     .ico{background:rgba(255,255,255,0.4);border:1px solid rgba(0,0,0,0.07);color:#000;transition:.3s;cursor:pointer;width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
     .ico:hover{background:rgba(255,255,255,0.6);border-color:rgba(0,0,0,0.15);color:#000;transform:translateY(-2px)}
     .line{flex:1;height:1px;background:rgba(0,0,0,0.12)}
@@ -104,7 +111,7 @@
             <iconify-icon id="lgEye" icon="lucide:eye-off" width="18"></iconify-icon>
           </button>
         </div>
-        <button type="button" id="lgBtn" class="btn mt-1" onclick="handleEmailLogin()">登录 / 注册</button>
+        <button type="button" id="lgBtn" class="btn-transparent mt-1" onclick="handleEmailLogin()">登录 / 注册</button>
       </form>
       <div class="text-right mt-2">
         <span class="link" onclick="showView('lgForgot')">忘记密码？</span>
@@ -121,9 +128,9 @@
         <iconify-icon icon="lucide:mail" width="18" class="icn"></iconify-icon>
         <input id="lgForgotEmail" type="email" placeholder="邮箱地址" class="ipt" autocomplete="email">
       </div>
-      <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn mt-1">发送重置链接</button>
+      <button onclick="handleForgotPassword()" id="lgForgotBtn" class="btn-transparent mt-1">发送重置链接</button>
       <div class="text-center mt-3">
-        <button onclick="showView('lgMain')" class="btn mt-2" style="background:transparent;color:rgba(0,0,0,0.4);border:1px solid rgba(0,0,0,0.07);">返回登录</button>
+        <button onclick="showView('lgMain')" class="btn-transparent mt-2">返回登录</button>
       </div>
     </div>
     <div id="lgReset" class="pg">
