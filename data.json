@@ -59,6 +59,21 @@
       "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-riX9d",
       "paid": false,
       "price": "¥0"
+    },
+    {
+      "id": 5,
+      "name": "mugen神之战",
+      "cover": "https://s41.ax1x.com/2026/08/18/pmveMO1.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/18/pmveKyR.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/18/pmveMO1.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/18/pmvelex.md.jpg",
+      "size": "3.8GB",
+      "time": "2026-08-18",
+      "compat": "通用",
+      "desc": "作者们制作的最强（且极度破格）的AI角色进行的一场淘汰赛，比的不是玩家操作，而是代码的强度和作者对“神”的理解",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
     }
   ],
   "updates": []
