@@ -15,7 +15,11 @@ function updateThemeColor(isLight) { const meta = document.getElementById('theme
 function tgSw(el) { el.classList.toggle('on'); const isLight = el.classList.contains('on'); if (isLight) { document.body.classList.remove('light-theme'); saveToCache('theme', 'dark') } else { document.body.classList.add('light-theme'); saveToCache('theme', 'light') } updateThemeColor(!isLight); toast(isLight ? '夜间模式' : '日间模式') }
 function tgSB() { const isOpen = _sbMobile.classList.toggle('op'); _moOv.classList.toggle('sh', isOpen) }
 function openLoginPage() { window.location.href = 'login.html' }
-const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co', _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE', _sb = supabase.createClient(_SB_URL, _SB_KEY);
+const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co', _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE', _sb = supabase.createClient(_SB_URL, _SB_KEY, {
+    auth: {
+        persistSession: true
+    }
+});
 async function handleLogout() {
     const btns = document.querySelectorAll('#profileContent button');
     let btn = null;
