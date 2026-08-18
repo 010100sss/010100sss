@@ -440,4 +440,23 @@ function opD(id) {
     }
     opM('dlM')
 }
-function mkPd(id) { const r = R.find(item => item.id === id); if (!r) { toast('资源不存在'); return } if (r.paid
+function mkPd(id) { const r = R.find(item => item.id === id); if (!r) { toast('资源不存在'); return } if (r.paid) { toast('该资源已付费'); return } r.paid = true; clM('dlM'); toast('付费成功'); pushUserMeta(); rP(); opD(id) }
+function restoreCache() {
+    const theme = loadFromCache('theme', 'light'), toggle = document.getElementById('themeToggle');
+    let isLight = false;
+    if (theme === 'light') { toggle.classList.remove('on'); document.body.classList.add('light-theme'); isLight = true; } else { toggle.classList.add('on'); document.body.classList.remove('light-theme'); }
+    updateThemeColor(isLight);
+    try { localStorage.removeItem('mugen_favs'); localStorage.removeItem('mugen_paid'); } catch (e) {}
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { clM('dlM'); clM('spM'); clM('anM'); clM('chPwM'); } });
+restoreCache();
+fetch('data.json').then(res => res.json()).then(data => { 
+    if (data.resources && data.resources.length) {
+        R = data.resources;
+    }
+    updatesData = data.updates || []; 
+    if (_curUser) { const favIds = _curUser.user_metadata?.favs || [], paidIds = _curUser.user_metadata?.paid || []; R.forEach(item => { if (favIds.includes(item.id)) item.fav = true; if (paidIds.includes(item.id)) item.paid = true }); } 
+    if (!R.length) toast('暂无资源'); 
+    rH() 
+}).catch(() => { toast('加载失败'); rH() });
+opM('anM');
