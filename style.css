@@ -156,14 +156,3 @@ iconify-icon { -webkit-tap-highlight-color: transparent; user-select: none; -web
 }
 .sidebar-desktop, .sidebar-mobile { flex-shrink: 0 }
 .sidebar-desktop *, .sidebar-mobile * { pointer-events: auto !important }
-
-/* 评论输入框动画 */
-#commentInputBar {
-    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-}
-#commentInputBar.show {
-    transform: translateY(0) !important;
-}
-#commentInputBar.hidden {
-    transform: translateY(100%) !important;
-}
