@@ -33,7 +33,7 @@ header.glass { margin: 10px 10px 0 10px; border-radius: 20px; border: 1px solid 
 .md { transform: scale(.95); opacity: 0; transition: transform .2s ease, opacity .2s ease }
 .ov.sh .md { transform: scale(1); opacity: 1 }
 .tc { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; align-items: center }
-.ti { opacity: 0; transform: translateY(-10px); transition: opacity .2s, transform .2s; pointer-events: none; background: rgba(18,18,24,.7); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 12px 24px; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,.3); white-space: nowrap; display: inline-block; margin-bottom: 8px }
+.ti { opacity: 0; transform: translateY(-10px); transition: opacity .2s, transform .2s; pointer-events: none; background: rgba(18,18,24,.92); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 12px 24px; color: #fff; font-size: 14px; font-weight: 500; box-shadow: 0 8px 32px rgba(0,0,0,.3); white-space: nowrap; display: inline-block; margin-bottom: 8px }
 .ti.sh { opacity: 1; transform: translateY(0) }
 .pg { display: none }
 .pg.on { display: block }
@@ -70,7 +70,7 @@ header.glass { margin: 10px 10px 0 10px; border-radius: 20px; border: 1px solid 
 .light-theme .ht.on:hover { background: rgba(251,191,36,.15) !important }
 .light-theme .app-wrap { background: transparent !important }
 .light-theme .glass-side { box-shadow: 0 4px 24px rgba(0,0,0,.06) }
-.light-theme .ti { background: rgba(255,255,255,.8) !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; color: #1a1a1a !important; border-color: rgba(0,0,0,.08) !important }
+.light-theme .ti { background: rgba(255,255,255,.9) !important; color: #1a1a1a !important; border-color: rgba(0,0,0,.08) !important }
 .light-theme .n { color: #1a1a1a !important; background: transparent !important }
 .light-theme .n:hover, .light-theme .n.on { color: #000 !important; background: rgba(0,0,0,.1) !important }
 .light-theme .text-white, .light-theme .text-white\/10, .light-theme .text-white\/20, .light-theme .text-white\/25, .light-theme .text-white\/30, .light-theme .text-white\/35, .light-theme .text-white\/40, .light-theme .text-white\/45, .light-theme .text-white\/50, .light-theme .text-white\/60, .light-theme .text-white\/70, .light-theme .text-white\/80, .light-theme h1, .light-theme h2, .light-theme h3, .light-theme p, .light-theme span, .light-theme a, .light-theme .login-box .btn { color: #1a1a1a !important }
