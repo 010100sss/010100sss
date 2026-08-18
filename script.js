@@ -90,13 +90,263 @@ function rF() { renderList('fvG', 'fvE', r => r.fav) }
 function rP() { renderList('puG', 'puE', r => r.paid) }
 function rU() { const list = document.getElementById('upL'); if (!list) return; if (updatesData.length) { const sorted = [...updatesData].sort((a, b) => b.d.localeCompare(a.d)); list.innerHTML = sorted.map(x => `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`).join('') } }
 function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; } r.fav = !r.fav; toast(r.fav ? '已收藏' : '已取消收藏'); document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav)); const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav); pushUserMeta(); if (cP === 'fav') rF() }
+
+// ===== 评论功能 =====
+
+function toggleComments(resourceId) {
+    const section = document.getElementById('commentSection');
+    const btn = document.getElementById('commentToggleBtn');
+    if (!section || !btn) return;
+    const isHidden = section.classList.contains('hidden');
+    if (isHidden) {
+        section.classList.remove('hidden');
+        btn.innerHTML = '💬 评论(<span id="commentCount">0</span>) ▲';
+        loadComments(resourceId);
+    } else {
+        section.classList.add('hidden');
+        btn.innerHTML = '💬 评论(<span id="commentCount">0</span>) ▶';
+    }
+}
+
+async function loadComments(resourceId) {
+    const list = document.getElementById('commentList');
+    const countEl = document.getElementById('commentCount');
+    if (!list) return;
+    
+    const { data, error } = await _sb
+        .from('comments')
+        .select('*')
+        .eq('resource_id', resourceId)
+        .is('parent_id', null)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        list.innerHTML = '<p class="text-white/30 text-sm">评论加载失败</p>';
+        return;
+    }
+
+    if (countEl) countEl.textContent = data ? data.length : 0;
+
+    if (!data || data.length === 0) {
+        list.innerHTML = '<p class="text-white/30 text-sm text-center py-4">暂无评论，来说点什么吧</p>';
+        return;
+    }
+
+    let html = '';
+    for (const comment of data) {
+        const replies = await loadReplies(comment.id);
+        html += renderComment(comment, replies);
+    }
+    list.innerHTML = html;
+}
+
+async function loadReplies(parentId) {
+    const { data, error } = await _sb
+        .from('comments')
+        .select('*')
+        .eq('parent_id', parentId)
+        .order('created_at', { ascending: true });
+    if (error) return [];
+    return data || [];
+}
+
+function renderComment(comment, replies) {
+    const time = new Date(comment.created_at).toLocaleString();
+    const replyCount = replies ? replies.length : 0;
+    const hasReplies = replyCount > 0;
+
+    let repliesHtml = '';
+    if (hasReplies) {
+        const showRepliesList = replies.slice(0, 3);
+        const hiddenReplies = replies.slice(3);
+        repliesHtml = showRepliesList.map(r => renderReply(r)).join('');
+        if (hiddenReplies.length > 0) {
+            repliesHtml += `
+                <button class="text-white/30 text-xs hover:text-white/60 transition ml-10 mt-1" 
+                        onclick="toggleMoreReplies(${comment.id}, this)">
+                    ⏷ 展开 ${hiddenReplies.length} 条回复
+                </button>
+                <div class="hidden more-replies-${comment.id}">
+                    ${hiddenReplies.map(r => renderReply(r)).join('')}
+                </div>
+            `;
+        }
+    }
+
+    return `
+        <div class="comment-item bg-white/5 rounded-xl px-4 py-3" data-comment-id="${comment.id}">
+            <div class="flex items-start justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="text-white/60 text-xs font-medium">${escapeHtml(comment.user_email)}</span>
+                        <span class="text-white/20 text-xs">${time}</span>
+                        <button class="text-white/20 text-xs hover:text-white/50 transition" 
+                                onclick="showReplyInput(${comment.id}, '${comment.user_email}')">
+                            ↩ 回复
+                        </button>
+                    </div>
+                    <p class="text-white/80 text-sm">${escapeHtml(comment.content)}</p>
+                </div>
+            </div>
+            <div id="replyInput_${comment.id}" class="hidden mt-3 ml-6 flex gap-2">
+                <input type="text" placeholder="回复 @${comment.user_email}..." 
+                       class="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/30 reply-input">
+                <button onclick="submitReply(${comment.id}, '${comment.user_email}')" 
+                        class="bd px-4 py-2 rounded-xl text-sm">发送</button>
+                <button onclick="hideReplyInput(${comment.id})" 
+                        class="text-white/30 text-sm hover:text-white/60 transition">取消</button>
+            </div>
+            ${hasReplies ? `
+                <div class="ml-6 mt-2 border-l-2 border-white/10 pl-4 space-y-2">
+                    ${repliesHtml}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function renderReply(reply) {
+    const time = new Date(reply.created_at).toLocaleString();
+    const replyTo = reply.reply_to_name ? `@${reply.reply_to_name} ` : '';
+    return `
+        <div class="reply-item py-2 border-b border-white/5 last:border-0" data-reply-id="${reply.id}">
+            <div class="flex items-center gap-2 mb-0.5 flex-wrap">
+                <span class="text-white/50 text-xs font-medium">${escapeHtml(reply.user_email)}</span>
+                <span class="text-white/20 text-xs">${time}</span>
+                <button class="text-white/20 text-xs hover:text-white/50 transition" 
+                        onclick="showReplyInput(${reply.parent_id}, '${reply.user_email}')">
+                    ↩ 回复
+                </button>
+            </div>
+            <p class="text-white/70 text-sm">${replyTo}${escapeHtml(reply.content)}</p>
+        </div>
+    `;
+}
+
+function showReplyInput(parentId, replyToEmail) {
+    document.querySelectorAll('[id^="replyInput_"]').forEach(el => el.classList.add('hidden'));
+    const inputContainer = document.getElementById(`replyInput_${parentId}`);
+    if (!inputContainer) return;
+    inputContainer.classList.remove('hidden');
+    const input = inputContainer.querySelector('.reply-input');
+    if (input) {
+        input.focus();
+        input.placeholder = `回复 @${replyToEmail}...`;
+        input.dataset.replyTo = replyToEmail;
+    }
+    inputContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function hideReplyInput(parentId) {
+    const el = document.getElementById(`replyInput_${parentId}`);
+    if (el) el.classList.add('hidden');
+}
+
+function toggleMoreReplies(commentId, btn) {
+    const container = document.querySelector(`.more-replies-${commentId}`);
+    if (!container) return;
+    container.classList.toggle('hidden');
+    btn.textContent = container.classList.contains('hidden') 
+        ? `⏷ 展开 ${container.querySelectorAll('.reply-item').length} 条回复` 
+        : '⏶ 收起回复';
+}
+
+function getCurrentResourceId() {
+    const btn = document.getElementById('commentToggleBtn');
+    if (btn && btn.dataset.resourceId) return parseInt(btn.dataset.resourceId);
+    return null;
+}
+
+async function submitReply(parentId, replyToEmail) {
+    if (!_curUser) { toast('请先登录'); return; }
+    const inputContainer = document.getElementById(`replyInput_${parentId}`);
+    if (!inputContainer) return;
+    const input = inputContainer.querySelector('.reply-input');
+    const content = input.value.trim();
+    if (!content) { toast('请输入内容'); return; }
+    
+    const resourceId = getCurrentResourceId();
+    if (!resourceId) { toast('获取资源信息失败'); return; }
+
+    const { error } = await _sb.from('comments').insert({
+        resource_id: resourceId,
+        parent_id: parentId,
+        user_email: _curUser.email,
+        reply_to_email: replyToEmail,
+        reply_to_name: replyToEmail.split('@')[0],
+        content: content
+    });
+
+    if (error) { toast('发送失败: ' + error.message); return; }
+    toast('回复成功');
+    input.value = '';
+    hideReplyInput(parentId);
+    loadComments(resourceId);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ===== 原有 goDt 函数（加入评论功能） =====
+
 function goDt(id) {
     const r = R.find(item => item.id === id);
     if (!r) { toast('资源不存在'); return }
     if (cP !== 'detail') _fromPage = cP;
-    document.getElementById('dtC').innerHTML = `<div class="glass rounded-2xl overflow-hidden"><div class="grid grid-cols-1 sm:grid-cols-3 gap-0"><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img1||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片1</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img2||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片2</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img3||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片3</span>'"></div></div><div class="p-6 md:p-8"><h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2><div class="flex flex-wrap gap-2 mb-5"><span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span><span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span><span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span></div><div class="mb-6"><h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3><p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p></div><div class="flex items-center gap-3"><span class="ht ${r.fav?'on':''} text-lg" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="20"></iconify-icon></span><button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button></div></div></div>`;
-    cP = 'detail'; getPages().forEach(el => el.classList.remove('on')); document.getElementById('p-detail').classList.add('on'); _ct.scrollTop = 0
+
+    document.getElementById('dtC').innerHTML = `
+        <div class="glass rounded-2xl overflow-hidden max-w-full md:max-w-5xl lg:max-w-6xl">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-0">
+                <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden">
+                    <img src="${r.img1||r.cover||''}" class="w-full h-full object-cover" 
+                         onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片1</span>'">
+                </div>
+                <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden">
+                    <img src="${r.img2||r.cover||''}" class="w-full h-full object-cover" 
+                         onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片2</span>'">
+                </div>
+                <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden">
+                    <img src="${r.img3||r.cover||''}" class="w-full h-full object-cover" 
+                         onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片3</span>'">
+                </div>
+            </div>
+            <div class="p-6 md:p-8">
+                <h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2>
+                <div class="flex flex-wrap gap-2 mb-5">
+                    <span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span>
+                    <span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span>
+                    <span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span>
+                </div>
+                <div class="mb-6">
+                    <h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3>
+                    <p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <span class="ht ${r.fav?'on':''} text-lg" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏">
+                        <iconify-icon icon="lucide:star" width="20"></iconify-icon>
+                    </span>
+                    <button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button>
+                    <button id="commentToggleBtn" class="bd px-5 py-2.5 rounded-xl text-sm font-medium" 
+                            onclick="toggleComments(${r.id})" data-resource-id="${r.id}">
+                        💬 评论(<span id="commentCount">0</span>) ▶
+                    </button>
+                </div>
+                <div id="commentSection" class="mt-6 pt-4 border-t border-white/10 hidden">
+                    <div id="commentList" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    cP = 'detail';
+    getPages().forEach(el => el.classList.remove('on'));
+    document.getElementById('p-detail').classList.add('on');
+    _ct.scrollTop = 0;
 }
+
 const _enablePaidDownload = false;
 function opD(id) {
     const r = R.find(item => item.id === id);
