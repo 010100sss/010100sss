@@ -1,6 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box }
 body { font-family: Inter, sans-serif; overflow: hidden; height: 100vh; background: #0a0a0f }
-.bg { position: fixed; inset: 0; background: url('固定图片/主页背景-电脑.jpg') center/cover no-repeat; z-index: 0; transform: translateZ(0); backface-visibility: hidden }
+.bg { position: fixed; inset: 0; background: url('固定图片/主页背景-电脑-v1.jpg') center/cover no-repeat; z-index: 0; transform: translateZ(0); backface-visibility: hidden }
 @media (max-width: 768px) {
     .bg { background: url('固定图片/主页背景-手机.jpg') center/cover no-repeat }
 }
