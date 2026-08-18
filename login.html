@@ -46,7 +46,7 @@
     .pg.on{display:block}
     .link{color:rgba(0,0,0,0.4);font-size:12px;cursor:pointer;transition:color .2s}
     .link:hover{color:rgba(0,0,0,0.7)}
-    .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(255,255,255,0.9);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:12px 24px;color:#1a1a1a;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.12);white-space:nowrap;display:inline-block;margin-bottom:8px}
+    .ti{opacity:0;transform:translateY(-10px);transition:opacity .2s,transform .2s;pointer-events:none;background:rgba(255,255,255,0.8);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:12px 24px;color:#1a1a1a;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.12);white-space:nowrap;display:inline-block;margin-bottom:8px}
     .ti.sh{opacity:1;transform:translateY(0)}
     .tc{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;align-items:center}
     @media(max-width:768){.glass{max-width:70vw;margin:0 auto;padding:16px}}
@@ -82,7 +82,7 @@
     body.dark-theme .ico:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.3);color:#fff}
     body.dark-theme .msg.ok{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.1);border-radius:12px}
     body.dark-theme .msg.err{background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3);border-radius:12px}
-    body.dark-theme .ti{background:rgba(18,18,24,.92);color:#fff;border-color:rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.3);border-radius:12px}
+    body.dark-theme .ti{background:rgba(18,18,24,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;border-color:rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.3);border-radius:12px}
     body.dark-theme .btn{background:#fff;color:#171717;border-radius:12px;padding:13px}
     body.dark-theme .btn:hover{background:rgba(255,255,255,.88);box-shadow:0 8px 24px rgba(0,0,0,.15);transform:translateY(-1px)}
     body.dark-theme .btn:disabled{opacity:.6}
