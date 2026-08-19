@@ -14,7 +14,7 @@ function updateThemeColor(isLight) { const meta = document.getElementById('theme
 function tgSw(el) { el.classList.toggle('on'); const isLight = el.classList.contains('on'); if (isLight) { document.body.classList.remove('light-theme'); saveToCache('theme', 'dark') } else { document.body.classList.add('light-theme'); saveToCache('theme', 'light') } updateThemeColor(!isLight); toast(isLight ? '夜间模式' : '日间模式') }
 function tgSB() { const isOpen = _sbMobile.classList.toggle('op'); _moOv.classList.toggle('sh', isOpen) }
 function openLoginPage() { window.location.href = 'login.html' }
-// ===== 修复：Supabase 客户端正确配置 =====
+// ===== Supabase 客户端配置 =====
 const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
 const _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
 const _sb = supabase.createClient(_SB_URL, _SB_KEY, {
@@ -22,11 +22,6 @@ const _sb = supabase.createClient(_SB_URL, _SB_KEY, {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true
-    },
-    global: {
-        headers: {
-            apikey: _SB_KEY
-        }
     }
 });
 async function handleLogout() {
@@ -134,7 +129,8 @@ async function loadComments(resourceId) {
             .from('comments')
             .select('*')
             .eq('resource_id', resourceId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .headers({ apikey: _SB_KEY });
 
         if (error) {
             console.error('加载评论失败:', error);
@@ -199,7 +195,8 @@ async function submitComment() {
                 user_email: _curUser.email,
                 content: content
             })
-            .select();
+            .select()
+            .headers({ apikey: _SB_KEY });
 
         if (error) {
             console.error('发送评论失败:', error);
