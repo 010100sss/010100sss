@@ -86,6 +86,14 @@
     body.dark-theme .btn{background:#fff;color:#171717;border-radius:12px;padding:13px}
     body.dark-theme .btn:hover{background:rgba(255,255,255,.88);box-shadow:0 8px 24px rgba(0,0,0,.15);transform:translateY(-1px)}
     body.dark-theme .btn:disabled{opacity:.6}
+
+    /* ===== 手机端毛玻璃减半 ===== */
+    @media (max-width: 768px) {
+        .glass {
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center">
