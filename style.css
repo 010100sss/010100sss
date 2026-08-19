@@ -2,7 +2,7 @@
 body { font-family: Inter, sans-serif; overflow: hidden; height: 100vh; background: #0a0a0f }
 .bg { position: fixed; inset: 0; background: url('固定图片/主页背景-电脑.jpg') center/cover no-repeat; z-index: 0; transform: translateZ(0); backface-visibility: hidden }
 @media (max-width: 768px) {
-    .bg { background: url('固定图片/主页背景-手机.jpg') center/cover no-repeat }
+    .bg { background: url('固定图片/主页背景-手机v0.1.jpg') center/cover no-repeat }
 }
 .bg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 0; pointer-events: none; opacity: 0; transition: opacity .25s ease }
 body:not(.light-theme) .bg-overlay { opacity: 1 }
