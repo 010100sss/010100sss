@@ -153,6 +153,12 @@ iconify-icon { -webkit-tap-highlight-color: transparent; user-select: none; -web
     .light-theme .login-box .btn { background: rgba(0,0,0,.85) !important; color: #fff !important }
     .light-theme header.glass { background: rgba(255,255,255,.4) !important }
     .light-theme .sidebar-mobile { background: rgba(255,255,255,.4) !important; border-color: rgba(0,0,0,.06) !important }
+
+    /* ===== 手机端毛玻璃减半 ===== */
+    .sidebar-desktop, .sidebar-mobile, .c, .glass, .glass-side {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+    }
 }
 .sidebar-desktop, .sidebar-mobile { flex-shrink: 0 }
 .sidebar-desktop *, .sidebar-mobile * { pointer-events: auto !important }
