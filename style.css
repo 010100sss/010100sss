@@ -162,12 +162,3 @@ iconify-icon { -webkit-tap-highlight-color: transparent; user-select: none; -web
 }
 .sidebar-desktop, .sidebar-mobile { flex-shrink: 0 }
 .sidebar-desktop *, .sidebar-mobile * { pointer-events: auto !important }
-
-/* ===== 页面切换淡入动画 ===== */
-@keyframes fu {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.fu {
-    animation: fu .4s ease-out both;
-}
