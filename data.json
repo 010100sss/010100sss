@@ -74,6 +74,21 @@
       "dl": "",
       "paid": false,
       "price": "¥0"
+    },
+    {
+      "id": 6,
+      "name": "KOF UM",
+      "cover": "https://s41.ax1x.com/2026/08/19/pmvRNCt.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/19/pmvRY4I.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/19/pmvRNCt.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/19/pmvRU8P.md.jpg",
+      "size": "676MB",
+      "time": "2026-08-19",
+      "compat": "通用",
+      "desc": "高仿拳皇02UM，并引入拳皇13部分角色",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
     }
   ],
   "updates": []
