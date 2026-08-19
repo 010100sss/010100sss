@@ -195,7 +195,16 @@
     function showView(id) {
       ['lgMain', 'lgForgot', 'lgReset'].forEach(v => {
         const el = $(v);
-        if (el) el.classList.toggle('on', v === id);
+        if (el) {
+          el.classList.toggle('on', v === id);
+          if (v === id) {
+            el.classList.remove('fu');
+            void el.offsetWidth;
+            el.classList.add('fu');
+          } else {
+            el.classList.remove('fu');
+          }
+        }
       });
       ['lgMsg', 'lgForgotMsg', 'lgResetMsg'].forEach(id => {
         const el = $(id);
