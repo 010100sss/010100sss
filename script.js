@@ -14,7 +14,8 @@ function updateThemeColor(isLight) { const meta = document.getElementById('theme
 function tgSw(el) { el.classList.toggle('on'); const isLight = el.classList.contains('on'); if (isLight) { document.body.classList.remove('light-theme'); saveToCache('theme', 'dark') } else { document.body.classList.add('light-theme'); saveToCache('theme', 'light') } updateThemeColor(!isLight); toast(isLight ? '夜间模式' : '日间模式') }
 function tgSB() { const isOpen = _sbMobile.classList.toggle('op'); _moOv.classList.toggle('sh', isOpen) }
 function openLoginPage() { window.location.href = 'login.html' }
-// ===== Supabase 客户端配置 =====
+
+// ===== Supabase 配置 =====
 const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co';
 const _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE';
 const _sb = supabase.createClient(_SB_URL, _SB_KEY, {
@@ -24,6 +25,7 @@ const _sb = supabase.createClient(_SB_URL, _SB_KEY, {
         detectSessionInUrl: true
     }
 });
+
 async function handleLogout() {
     const btns = document.querySelectorAll('#profileContent button');
     let btn = null;
@@ -101,7 +103,7 @@ function rU() { const list = document.getElementById('upL'); if (!list) return; 
 function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; } r.fav = !r.fav; toast(r.fav ? '已收藏' : '已取消收藏'); document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav)); const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav); pushUserMeta(); if (cP === 'fav') rF() }
 
 // ============================================================
-// ===== 评论功能 =====
+// ===== 评论功能（使用原生 fetch） =====
 // ============================================================
 
 function toggleComments(resourceId) {
@@ -125,18 +127,21 @@ async function loadComments(resourceId) {
     if (!list) return;
     
     try {
-        const { data, error } = await _sb
-            .from('comments')
-            .select('*')
-            .eq('resource_id', resourceId)
-            .order('created_at', { ascending: false })
-            .headers({ apikey: _SB_KEY });
-
-        if (error) {
-            console.error('加载评论失败:', error);
-            list.innerHTML = '<p class="text-white/30 text-sm">评论加载失败</p>';
-            return;
+        const response = await fetch(
+            `${_SB_URL}/rest/v1/comments?resource_id=eq.${resourceId}&order=created_at.desc`,
+            {
+                headers: {
+                    'apikey': _SB_KEY,
+                    'Authorization': `Bearer ${_SB_KEY}`
+                }
+            }
+        );
+        
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
         }
+        
+        const data = await response.json();
 
         if (countEl) countEl.textContent = data ? data.length : 0;
 
@@ -155,7 +160,7 @@ async function loadComments(resourceId) {
             </div>
         `).join('');
     } catch (e) {
-        console.error('加载评论异常:', e);
+        console.error('加载评论失败:', e);
         list.innerHTML = '<p class="text-white/30 text-sm">加载失败，请刷新重试</p>';
     }
 }
@@ -188,27 +193,35 @@ async function submitComment() {
     }
     
     try {
-        const { data, error } = await _sb
-            .from('comments')
-            .insert({
-                resource_id: resourceId,
-                user_email: _curUser.email,
-                content: content
-            })
-            .select()
-            .headers({ apikey: _SB_KEY });
-
-        if (error) {
-            console.error('发送评论失败:', error);
-            toast('发送失败: ' + error.message);
-            return;
+        const response = await fetch(
+            `${_SB_URL}/rest/v1/comments`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': _SB_KEY,
+                    'Authorization': `Bearer ${_SB_KEY}`,
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify({
+                    resource_id: resourceId,
+                    user_email: _curUser.email,
+                    content: content
+                })
+            }
+        );
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'HTTP ' + response.status);
         }
+        
         toast('评论成功');
         input.value = '';
         loadComments(resourceId);
     } catch (e) {
-        console.error('发送评论异常:', e);
-        toast('发送失败，请重试');
+        console.error('发送评论失败:', e);
+        toast('发送失败: ' + e.message);
     }
 }
 
@@ -219,7 +232,7 @@ function escapeHtml(text) {
 }
 
 // ============================================================
-// ===== goDt 详情页（已包含评论按钮和评论区） =====
+// ===== goDt 详情页 =====
 // ============================================================
 
 function goDt(id) {
