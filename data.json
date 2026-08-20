@@ -11,7 +11,7 @@
       "time": "2026-08-05",
       "compat": "通用",
       "desc": "高仿拳皇13的MUGEN整合",
-      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-Kx49d",
+      "dl": "",
       "price": "¥0",
       "paid": false
     },
@@ -26,7 +26,7 @@
       "time": "2026-08-08",
       "compat": "通用",
       "desc": "这款游戏最精彩的是角色选择的屏幕，它根据日本队与球队老板的KOF故事进行整理，除了来自The Kizona encounter、Samurai Shodown和Garou:Mark of the Wolves的角色外，还有《狼队》，游戏采用观赛模式，你可以观看自己喜爱的格斗，并拥有自己的锦标赛，如果想使用3v3和4v4模式，也可以使用4G补丁",
-      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-yTAAd",
+      "dl": "",
       "paid": false,
       "price": "¥0"
     },
@@ -41,7 +41,7 @@
       "time": "2026-08-10",
       "compat": "通用",
       "desc": "高仿KOF2002UM的MUGEN整合",
-      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-JdSAd",
+      "dl": "",
       "paid": false,
       "price": "¥0"
     },
@@ -56,7 +56,7 @@
       "time": "2026-08-12",
       "compat": "通用",
       "desc": "高仿KOF98的MUGEN整合",
-      "dl": "https://1838371411.share.123pan.cn/123pan/ZwDFTd-riX9d",
+      "dl": "",
       "paid": false,
       "price": "¥0"
     },
@@ -86,6 +86,21 @@
       "time": "2026-08-19",
       "compat": "通用",
       "desc": "高仿拳皇02UM，并引入拳皇13部分角色",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 7,
+      "name": "KOF XIII IN 97高清MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/20/pmxKBy4.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/20/pmxKwSU.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/20/pmxKBy4.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/20/pmxKgFx.jpg",
+      "size": "864MB",
+      "time": "2026-08-20",
+      "compat": "通用",
+      "desc": "11年左右，由“拳皇家族”社群整合发布，保留拳皇97的对战框架、3v3组队选队模式，全部角色使用拳皇13（KOF13）的高清立绘、战斗素材、特效画风",
       "dl": "",
       "paid": false,
       "price": "¥0"
