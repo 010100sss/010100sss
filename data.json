@@ -104,19 +104,6 @@
       "dl": "",
       "paid": false,
       "price": "¥0"
-    },
-    {
-      "id": 8,
-      "name": "测试",
-      "cover": "https://s21.ax1x.com/2025/01/01/pAzXw8g.md.jpg",
-      "img1": "",
-      "img3": "",
-      "size": "",
-      "time": "2026-08-20",
-      "compat": "通用",
-      "desc": "测试"
-      "paid": false,
-      "price": "¥0"
     }
   ],
   "updates": []
