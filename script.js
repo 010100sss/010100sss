@@ -83,32 +83,101 @@ _sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? s
 window.addEventListener('storage', function(e) { if (e.key === 'mugen_login_sync' && e.newValue) { _sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? session.user : null); if (session) { toast('登录成功'); localStorage.removeItem('mugen_login_sync'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); } }); } });
 function go(p) { if (cP !== 'detail') _fromPage = cP; cP = p; getNavItems().forEach(n => n.classList.toggle('on', n.dataset.p === p)); getPages().forEach(el => el.classList.remove('on')); const target = document.getElementById('p-' + p); if (target) target.classList.add('on'); _sI.value = ''; sQ = ''; if (p === 'home') rH(); if (p === 'fav') rF(); if (p === 'purchased') rP(); if (p === 'updates') rU(); _ct.scrollTop = 0; if (window.innerWidth <= 768 && _sbMobile.classList.contains('op')) tgSB() }
 function doS() { clearTimeout(_sTimer); _sTimer = setTimeout(() => { sQ = _sI.value.trim().toLowerCase(); if (cP !== 'home') go('home'); rH() }, 300) }
-function cHTML(r, sp) { const fc = r.fav ? 'on' : ''; let pt = ''; if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>'; return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})"><div class="db w-20 h-20 flex-shrink-0"><img src="${r.cover||''}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div><div class="flex-1 min-w-0"><div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div><p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p></div><div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()"><span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="18"></iconify-icon></span><button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button></div></div>` }
+
+// ===== 改动的三个函数 =====
+
+function cHTML(r, sp) {
+  const fc = r.fav ? 'on' : '';
+  const coverImg = r.cover || r.img1 || '';
+  const formatText = r.format || 'MUGEN';
+  let pt = '';
+  if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>';
+  return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})">
+    <div class="db w-20 h-20 flex-shrink-0"><img src="${coverImg}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div>
+      <p class="text-white/30 text-xs mt-1.5">${formatText} · ${r.size||'未知大小'} · ${r.time||'刚刚'}</p>
+    </div>
+    <div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()">
+      <span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="18"></iconify-icon></span>
+      <button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button>
+    </div>
+  </div>`;
+}
+
 function renderList(gId, eId, filter) { let items = R.filter(filter); items.sort((a, b) => (b.time || '').localeCompare(a.time || '')); const g = document.getElementById(gId), e = document.getElementById(eId); if (!g || !e) return; if (items.length) { g.innerHTML = items.map(r => cHTML(r, false)).join(''); g.classList.remove('hidden'); e.classList.add('hidden'); e.classList.remove('flex') } else { g.classList.add('hidden'); e.classList.remove('hidden'); e.classList.add('flex') } const tc = document.getElementById('totalCount'); if (tc) tc.textContent = R.length }
 function rH() { renderList('hG', 'hE', r => sQ ? r.name.toLowerCase().includes(sQ) : true) }
 function rF() { renderList('fvG', 'fvE', r => r.fav) }
 function rP() { renderList('puG', 'puE', r => r.paid) }
 function rU() { const list = document.getElementById('upL'); if (!list) return; if (updatesData.length) { const sorted = [...updatesData].sort((a, b) => b.d.localeCompare(a.d)); list.innerHTML = sorted.map(x => `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`).join('') } }
 function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; } r.fav = !r.fav; toast(r.fav ? '已收藏' : '已取消收藏'); document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav)); const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav); pushUserMeta(); if (cP === 'fav') rF() }
+
 function goDt(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) { toast('资源不存在'); return }
-    if (cP !== 'detail') _fromPage = cP;
-    document.getElementById('dtC').innerHTML = `<div class="glass rounded-2xl overflow-hidden"><div class="grid grid-cols-1 sm:grid-cols-3 gap-0"><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img1||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片1</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img2||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片2</span>'"></div><div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img3||r.cover||''}" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-white/15 text-xs\\'>图片3</span>'"></div></div><div class="p-6 md:p-8"><h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2><div class="flex flex-wrap gap-2 mb-5"><span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span><span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span><span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span></div><div class="mb-6"><h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3><p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p></div><div class="flex items-center gap-3"><span class="ht ${r.fav?'on':''} text-lg" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="20"></iconify-icon></span><button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button></div></div></div>`;
-    cP = 'detail'; getPages().forEach(el => el.classList.remove('on')); document.getElementById('p-detail').classList.add('on'); _ct.scrollTop = 0
+  const r = R.find(item => item.id === id);
+  if (!r) { toast('资源不存在'); return }
+  if (cP !== 'detail') _fromPage = cP;
+  const formatText = r.format || 'MUGEN';
+  document.getElementById('dtC').innerHTML = `
+    <div class="glass rounded-2xl p-6 md:p-8">
+      <button onclick="go('${_fromPage}')" class="flex items-center gap-1.5 text-white/40 hover:text-white/70 text-xs transition modal-close mb-5 -ml-1">
+        <span class="mini-card">返回</span>
+      </button>
+      <h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <span class="tag"><iconify-icon icon="lucide:file" width="12"></iconify-icon>${formatText}</span>
+        <span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span>
+        <span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span>
+        <span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span>
+      </div>
+      <div class="mb-6">
+        <h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3>
+        <p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="ht ${r.fav?'on':''}" data-fav="${r.id}" onclick="tgF(${r.id})">
+          <iconify-icon icon="lucide:star" width="20"></iconify-icon>
+        </span>
+        <button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button>
+      </div>
+    </div>
+  `;
+  cP = 'detail';
+  getPages().forEach(el => el.classList.remove('on'));
+  document.getElementById('p-detail').classList.add('on');
+  _ct.scrollTop = 0;
 }
-const _enablePaidDownload = false;
+
 function opD(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) return;
-    if (_enablePaidDownload) {
-        if (r.paid) { document.getElementById('dlB').innerHTML = `<div class="flex items-center gap-3 p-4 rounded-xl bg-white/5"><div class="flex-1 min-w-0"><p class="text-white/40 text-xs mb-1">下载链接</p><p class="text-white text-sm truncate">${r.dl||''}</p></div><button onclick="cp('${r.dl||''}')" class="copy-btn text-xs text-white/50 hover:text-white/80 transition px-3 py-1.5 rounded-lg bg-white/8 hover:bg-white/15">复制</button></div>`; opM('dlM'); return; }
-        document.getElementById('dlB').innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div class="p-4 rounded-xl bg-white/5 flex flex-col items-center"><p class="text-white/60 text-xs font-medium mb-3">付费下载</p><img src="固定图片/收款码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white text-lg font-semibold mb-3">${r.price||'¥0'}</p><button onclick="mkPd(${r.id})" class="w-full py-2 rounded-xl text-sm font-medium bg-white/15 text-white hover:bg-white/25 transition">我已付费</button></div><div class="p-4 rounded-xl bg-white/5 flex flex-col items-center"><p class="text-white/60 text-xs font-medium mb-3">免费下载</p><img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p><button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button></div></div>`;
-    } else {
-        document.getElementById('dlB').innerHTML = `<div class="flex flex-col items-center p-4 rounded-xl bg-white/5"><p class="text-white/60 text-xs font-medium mb-3">免费下载</p><img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p><button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button></div>`;
-    }
-    opM('dlM')
+  const r = R.find(item => item.id === id);
+  if (!r) return;
+
+  // 判断新旧格式：新格式有 format 且无 img1，旧格式无 format 且有 img1
+  const isNewFormat = r.format && !r.img1;
+
+  // 有 dl 链接 → 直接跳转（新旧格式都走）
+  if (r.dl && r.dl.trim() !== '') {
+    window.location.href = r.dl;
+    return;
+  }
+
+  // 没有 dl 链接
+  if (isNewFormat) {
+    // 新格式 → toast 提示
+    toast('暂无下载链接');
+  } else {
+    // 旧格式 → 弹窗显示群二维码
+    document.getElementById('dlB').innerHTML = `
+      <div class="flex flex-col items-center p-4 rounded-xl bg-white/5">
+        <p class="text-white/60 text-xs font-medium mb-3">免费下载</p>
+        <img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'">
+        <p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p>
+        <button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button>
+      </div>
+    `;
+    opM('dlM');
+  }
 }
+
 function mkPd(id) { const r = R.find(item => item.id === id); if (!r) { toast('资源不存在'); return } if (r.paid) { toast('该资源已付费'); return } r.paid = true; clM('dlM'); toast('付费成功'); pushUserMeta(); rP(); opD(id) }
 function restoreCache() {
     const theme = loadFromCache('theme', 'light'), toggle = document.getElementById('themeToggle');
