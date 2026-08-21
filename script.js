@@ -1,146 +1,144 @@
-function saveToCache(k, v) { try { localStorage.setItem('mugen_' + k, JSON.stringify(v)) } catch (e) {} }
-function loadFromCache(k, d) { try { const v = localStorage.getItem('mugen_' + k); if (v !== null) return JSON.parse(v) } catch (e) {} return d }
-let R = [], updatesData = [], cP = 'home', sQ = '', _sTimer = null, _curUser = null, _fromPage = 'home';
-const _tC = document.getElementById('tC'), _ct = document.getElementById('ct'), _sI = document.getElementById('sI'), _sbMobile = document.getElementById('sbMobile'), _moOv = document.getElementById('moOv');
-let _navItems = null, _pages = null;
-function getNavItems() { if (!_navItems) _navItems = document.querySelectorAll('.n'); return _navItems }
-function getPages() { if (!_pages) _pages = document.querySelectorAll('.pg'); return _pages }
-function toast(m) { const d = document.createElement('div'); d.className = 'ti'; d.textContent = m; _tC.appendChild(d); requestAnimationFrame(() => d.classList.add('sh')); setTimeout(() => { d.classList.remove('sh'); setTimeout(() => d.remove(), 300) }, 2500) }
-function opM(id) { document.getElementById(id).classList.add('sh'); document.body.style.overflow = 'hidden' }
-function clM(id) { document.getElementById(id).classList.remove('sh'); document.body.style.overflow = '' }
-function cp(t) { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(() => toast('复制成功')).catch(() => fallbackCopy(t)) } else fallbackCopy(t) }
-function fallbackCopy(t) { try { const i = document.createElement('input'); i.value = t; i.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0'; document.body.appendChild(i); i.select(); document.execCommand('copy'); document.body.removeChild(i); toast('复制成功') } catch (e) { toast('复制失败，请手动复制') } }
-function updateThemeColor(isLight) { const meta = document.getElementById('themeColorMeta'); if (meta) meta.content = isLight ? '#f5f5f5' : '#0a0a0f' }
-function tgSw(el) { el.classList.toggle('on'); const isLight = el.classList.contains('on'); if (isLight) { document.body.classList.remove('light-theme'); saveToCache('theme', 'dark') } else { document.body.classList.add('light-theme'); saveToCache('theme', 'light') } updateThemeColor(!isLight); toast(isLight ? '夜间模式' : '日间模式') }
-function tgSB() { const isOpen = _sbMobile.classList.toggle('op'); _moOv.classList.toggle('sh', isOpen) }
-function openLoginPage() { window.location.href = 'login.html' }
-const _SB_URL = 'https://zsqqyvmoejbljzvztclf.supabase.co', _SB_KEY = 'sb_publishable_W8Wz85rKZOwqa76AG0WNGw_JjK2_8qE', _sb = supabase.createClient(_SB_URL, _SB_KEY);
-async function handleLogout() {
-    const btns = document.querySelectorAll('#profileContent button');
-    let btn = null;
-    for (const b of btns) if (b.textContent.trim() === '退出账号') { btn = b; break; }
-    if (btn) { btn.disabled = true; btn.innerHTML = '<iconify-icon icon="lucide:loader-circle" width="15" class="animate-spin"></iconify-icon> 正在退出...'; }
-    await _sb.auth.signOut();
-    toast('已退出登录');
-    localStorage.removeItem('mugen_login_sync');
-    if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-}
-async function handleChangePassword() {
-    if (!_curUser) { toast('请先登录'); return; }
-    const pw = document.getElementById('chPwNew').value, cf = document.getElementById('chPwConf').value;
-    if (!pw || pw.length < 6) { setChPwMsg('新密码至少需要6位', true); return; }
-    if (pw !== cf) { setChPwMsg('两次密码不一致', true); return; }
-    const btn = document.getElementById('chPwBtn');
-    btn.disabled = true; btn.textContent = '请稍候…';
-    const { error } = await _sb.auth.updateUser({ password: pw });
-    btn.disabled = false; btn.textContent = '确认修改';
-    if (error) { setChPwMsg(error.message || '修改失败', true); } else { setChPwMsg('密码修改成功', false); document.getElementById('chPwNew').value = ''; document.getElementById('chPwConf').value = ''; setTimeout(() => { clM('chPwM'); setChPwMsg('', false); }, 1500); }
-}
-function setChPwMsg(msg, isErr) { const el = document.getElementById('chPwMsg'); if (!msg) { el.style.display = 'none'; return; } el.style.display = 'block'; el.style.background = isErr ? 'rgba(239,68,68,.15)' : 'rgba(255,255,255,.08)'; el.style.color = isErr ? '#f87171' : 'rgba(255,255,255,.7)'; el.style.border = isErr ? '1px solid rgba(239,68,68,.3)' : '1px solid rgba(255,255,255,.1)'; el.textContent = msg; }
-function applyUserData(favIds, paidIds) {
-    let changed = false;
-    R.forEach(item => { const nf = favIds.includes(item.id), np = paidIds.includes(item.id); if (nf !== item.fav || np !== item.paid) changed = true; item.fav = nf; item.paid = np; });
-    if (!changed) return;
-    if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP();
-}
-async function pushUserMeta() {
-    if (!_curUser) return;
-    const favIds = R.filter(item => item.fav).map(item => item.id), paidIds = R.filter(item => item.paid).map(item => item.id);
-    const { data, error } = await _sb.auth.updateUser({ data: { favs: favIds, paid: paidIds } });
-    if (!error && data?.user) _curUser = data.user;
-}
-function updateAuthUI(user) {
-    _curUser = user;
-    const icon = document.getElementById('hAvIcon'), letter = document.getElementById('hAvLetter'), pc = document.getElementById('profileContent');
-    if (user) {
-        const initial = (user.email || 'U')[0].toUpperCase();
-        if (icon) icon.classList.add('hidden');
-        if (letter) { letter.textContent = initial; letter.classList.remove('hidden'); }
-        if (pc) pc.innerHTML = `<div class="flex flex-col items-center gap-3 pb-5 mb-5" style="border-bottom:1px solid rgba(255,255,255,.06)"><div class="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-bold">${initial}</div><div class="text-center"><p class="text-white font-medium text-sm">${user.email}</p><p class="text-white/30 text-xs mt-0.5">已登录账户</p></div></div><div class="flex flex-col gap-2"><button onclick="if(!_curUser){toast('请先登录');return;}opM('chPwM')" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:key-round" width="15"></iconify-icon>修改密码</button><button onclick="handleLogout()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition flex items-center justify-center gap-2"><iconify-icon icon="lucide:log-out" width="15"></iconify-icon>退出账号</button></div>`;
-        if (R.length) { const favIds = user.user_metadata?.favs || [], paidIds = user.user_metadata?.paid || []; applyUserData(favIds, paidIds); }
-    } else {
-        if (icon) icon.classList.remove('hidden');
-        if (letter) { letter.textContent = ''; letter.classList.add('hidden'); }
-        if (pc) pc.innerHTML = `<iconify-icon icon="lucide:user" width="48" class="text-white/20 mx-auto mb-4"></iconify-icon><p class="text-white/40 text-sm mb-6">登录后查看个人资料</p><button onclick="openLoginPage()" class="w-full py-2.5 rounded-xl text-sm font-medium bg-white/10 text-white hover:bg-white/20 transition">登录 / 注册</button>`;
-        if (R.length) { R.forEach(item => { item.fav = false; item.paid = false; }); applyUserData([], []); }
+{
+  "resources": [
+    {
+      "id": 1,
+      "name": "KOFXIIISTEAM",
+      "cover": "https://s41.ax1x.com/2026/08/12/pmL1Qq1.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/12/pmL1KM9.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/12/pmL1Qq1.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/12/pmL11Vx.jpg",
+      "size": "1.62GB",
+      "time": "2026-08-05",
+      "compat": "通用",
+      "desc": "高仿拳皇13的MUGEN整合",
+      "dl": "",
+      "price": "¥0",
+      "paid": false
+    },
+    {
+      "id": 2,
+      "name": "KOF Zillion Mugen 2018",
+      "cover": "https://s41.ax1x.com/2026/08/15/pmXYCNR.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/15/pmXJzB4.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/15/pmXYCNR.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/15/pmXYk36.md.jpg",
+      "size": "646MB",
+      "time": "2026-08-08",
+      "compat": "通用",
+      "desc": "这款游戏最精彩的是角色选择的屏幕，它根据日本队与球队老板的KOF故事进行整理，除了来自The Kizona encounter、Samurai Shodown和Garou:Mark of the Wolves的角色外，还有《狼队》，游戏采用观赛模式，你可以观看自己喜爱的格斗，并拥有自己的锦标赛，如果想使用3v3和4v4模式，也可以使用4G补丁",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 3,
+      "name": "KOFH",
+      "cover": "https://s41.ax1x.com/2026/08/10/pmbc31s.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/10/pmbcGXq.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/10/pmbc31s.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/10/pmbcYn0.md.jpg",
+      "size": "1.78GB",
+      "time": "2026-08-10",
+      "compat": "通用",
+      "desc": "高仿KOF2002UM的MUGEN整合",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 4,
+      "name": "KOF98 MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/12/pmLPhh6.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/12/pmLP59K.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/12/pmLPocD.md.jpg",
+      "size": "1.08GB",
+      "time": "2026-08-12",
+      "compat": "通用",
+      "desc": "高仿KOF98的MUGEN整合",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 5,
+      "name": "mugen神之战",
+      "cover": "https://s41.ax1x.com/2026/08/18/pmveMO1.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/18/pmveKyR.md.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/18/pmveMO1.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/18/pmvelex.md.jpg",
+      "size": "3.8GB",
+      "time": "2026-08-18",
+      "compat": "通用",
+      "desc": "作者们制作的最强（且极度破格）的AI角色进行的一场淘汰赛，比的不是玩家操作，而是代码的强度和作者对“神”的理解",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 6,
+      "name": "KOF UM",
+      "cover": "https://s41.ax1x.com/2026/08/19/pmvRNCt.md.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/19/pmvRY4I.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/19/pmvRNCt.md.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/19/pmvRU8P.md.jpg",
+      "size": "676MB",
+      "time": "2026-08-19",
+      "compat": "通用",
+      "desc": "高仿拳皇02UM，并引入拳皇13部分角色",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 7,
+      "name": "KOF XIII IN 97高清MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/20/pmxKBy4.jpg",
+      "img1": "https://s41.ax1x.com/2026/08/20/pmxKwSU.jpg",
+      "img2": "https://s41.ax1x.com/2026/08/20/pmxKBy4.jpg",
+      "img3": "https://s41.ax1x.com/2026/08/20/pmxKgFx.jpg",
+      "size": "864MB",
+      "time": "2026-08-20",
+      "compat": "通用",
+      "desc": "11年左右，由“拳皇家族”社群整合发布，保留拳皇97的对战框架、3v3组队选队模式，全部角色使用拳皇13（KOF13）的高清立绘、战斗素材、特效画风",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
+    },
+    {
+      "id": 8,
+      "name": "必须进-拳魂觉醒0.1折",
+      "cover": "https://s41.ax1x.com/2026/08/21/pmzV7Uf.jpg",
+      "img1": "",
+      "img2": "",
+      "img3": "",
+      "size": "360MB",
+      "time": "2026-08-21",
+      "compat": "通用",
+      "desc": "喜欢玩拳皇MUGEN的来，给你们分享个好东西，卡牌手游，高度还原KOF，还有侍魂，月华剑士的粉丝也来，SNK正版授权0.1折，开局送八神庵，送月卡送300抽，每天还领648券，玩起来不累，当个副游挺香，我玩了整整4年，不好玩我吃，进来了必须下👿-010100
+      拳魂觉醒简介：
+SNK正版授权拳皇免费版
+★【开局福利】登录即领3星八神庵+绝版0.1折头像框+海量资源
+★【新服狂欢】在线即送月卡+300抽+5星八神庵，免费招募直送7星+超绝觉醒
+★【至尊VIP】0.1折拿下草薙京NEST和超绝觉醒，尊享原版VIP奖励！
+★【登录有礼】新服登录送4星暴走八神庵+武器觉醒+1000抽+限定“暴八萌头”，开局即巅峰
+★【新服嘉年华】做任务免费拿大量鬼八碎片，进阶暴走八神庵，还能抽草薙京限定时装！
+★【签到升级】每日签到领1000元充值卡，连签福利拿到手软
+★【每日轻松肝】每天活跃即领600连抽，轻松抽卡不停手！
+★【天天648】次日起，每日领648元可拆分代金券
+★【万元代金】激活勋章，月活轻松拿10000元永久代金券，随心买买买
+★【钻石保值】每日送出大量钻石，可无限次抽取顶级品质格斗家及海量豪礼
+★【百万充值卡】登录即可领取，神壕体验一秒解锁
+★【GM商城】登录活跃即享满级，免费换商城豪礼！
+★【小娜娜送礼】进游戏邮件直领100抽，抽卡起步就嗨翻
+《拳魂觉醒》是由SNK正版授权格斗卡牌手游。集结SNK多系列IP，重燃青春热血！经典必杀炫酷动效，每次出招都是高能！多元阵容随心配，无损继承良心养成，全员皆可升级顶配！更有全新潮流原创格斗之城，轻松休闲一番街玩法，回归纯粹乐趣！一起重拾最初的记忆，招募你的格斗天团！
+手游盒子：http://app.youyo88.com/spread/plat/538876/2.html
+点击下方下载，即可跳转游戏下载链接
+",
+      "dl": "http://app.youyo88.com/spread/app/538876/17161.html",
+      "paid": false,
+      "price": "¥0"
     }
+  ],
+  "updates": []
 }
-(function checkLoginSync() {
-    const sync = localStorage.getItem('mugen_login_sync');
-    if (sync) {
-        localStorage.removeItem('mugen_login_sync');
-        setTimeout(async () => {
-            try {
-                const { data: { session } } = await _sb.auth.getSession();
-                if (session) { updateAuthUI(session.user); toast('登录成功'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); }
-                else { setTimeout(async () => { const { data: { session: s2 } } = await _sb.auth.getSession(); if (s2) { updateAuthUI(s2.user); toast('登录成功'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); } }, 500); }
-            } catch (e) {}
-        }, 300);
-    }
-})();
-_sb.auth.onAuthStateChange((_event, session) => { if (_event === 'PASSWORD_RECOVERY') { toast('请前往登录页面重置密码'); window.location.href = 'login.html'; } updateAuthUI(session ? session.user : null); });
-_sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? session.user : null); if (session && localStorage.getItem('mugen_needProfile')) { localStorage.removeItem('mugen_needProfile'); setTimeout(() => go('profile'), 200); } });
-window.addEventListener('storage', function(e) { if (e.key === 'mugen_login_sync' && e.newValue) { _sb.auth.getSession().then(({ data: { session } }) => { updateAuthUI(session ? session.user : null); if (session) { toast('登录成功'); localStorage.removeItem('mugen_login_sync'); if (cP === 'home') rH(); else if (cP === 'fav') rF(); else if (cP === 'purchased') rP(); } }); } });
-function go(p) { if (cP !== 'detail') _fromPage = cP; cP = p; getNavItems().forEach(n => n.classList.toggle('on', n.dataset.p === p)); getPages().forEach(el => el.classList.remove('on')); const target = document.getElementById('p-' + p); if (target) target.classList.add('on'); _sI.value = ''; sQ = ''; if (p === 'home') rH(); if (p === 'fav') rF(); if (p === 'purchased') rP(); if (p === 'updates') rU(); _ct.scrollTop = 0; if (window.innerWidth <= 768 && _sbMobile.classList.contains('op')) tgSB() }
-function doS() { clearTimeout(_sTimer); _sTimer = setTimeout(() => { sQ = _sI.value.trim().toLowerCase(); if (cP !== 'home') go('home'); rH() }, 300) }
-function cHTML(r, sp) { const fc = r.fav ? 'on' : ''; let pt = ''; if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>'; return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})"><div class="db w-20 h-20 flex-shrink-0"><img src="${r.cover||''}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div><div class="flex-1 min-w-0"><div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div><p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p></div><div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()"><span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="18"></iconify-icon></span><button class="bd px-3 py-1.5 rounded-lg text-xs" onclick="opD(${r.id})">下载</button></div></div>` }
-function renderList(gId, eId, filter) { let items = R.filter(filter); items.sort((a, b) => (b.time || '').localeCompare(a.time || '')); const g = document.getElementById(gId), e = document.getElementById(eId); if (!g || !e) return; if (items.length) { g.innerHTML = items.map(r => cHTML(r, false)).join(''); g.classList.remove('hidden'); e.classList.add('hidden'); e.classList.remove('flex') } else { g.classList.add('hidden'); e.classList.remove('hidden'); e.classList.add('flex') } const tc = document.getElementById('totalCount'); if (tc) tc.textContent = R.length }
-function rH() { renderList('hG', 'hE', r => sQ ? r.name.toLowerCase().includes(sQ) : true) }
-function rF() { renderList('fvG', 'fvE', r => r.fav) }
-function rP() { renderList('puG', 'puE', r => r.paid) }
-function rU() { const list = document.getElementById('upL'); if (!list) return; if (updatesData.length) { const sorted = [...updatesData].sort((a, b) => b.d.localeCompare(a.d)); list.innerHTML = sorted.map(x => `<div class="glass rounded-xl p-4"><div class="flex items-center gap-3 mb-2"><span class="text-xs font-medium text-white/70 bg-white/10 px-2 py-0.5 rounded-md">${x.v}</span><span class="text-xs text-white/30">${x.d}</span></div><p class="text-white/50 text-sm">${x.t}</p></div>`).join('') } }
-function tgF(id) { const r = R.find(item => item.id === id); if (!r) return; if (!_curUser) { toast('请登录后再收藏'); return; } r.fav = !r.fav; toast(r.fav ? '已收藏' : '已取消收藏'); document.querySelectorAll('[data-fav="' + id + '"]').forEach(el => el.classList.toggle('on', r.fav)); const dh = document.querySelector('#dtC .ht'); if (dh) dh.classList.toggle('on', r.fav); pushUserMeta(); if (cP === 'fav') rF() }
-function goDt(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) { toast('资源不存在'); return }
-    if (cP !== 'detail') _fromPage = cP;
-
-    // 检查三张图片是否都有有效链接
-    const hasAll = r.img1 && r.img1.trim() !== '' && r.img2 && r.img2.trim() !== '' && r.img3 && r.img3.trim() !== '';
-
-    let imgsHtml = '';
-    if (hasAll) {
-        imgsHtml = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-0">
-            <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img1}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"></div>
-            <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img2}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"></div>
-            <div class="aspect-[4/3] bg-white/5 flex items-center justify-center overflow-hidden"><img src="${r.img3}" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"></div>
-        </div>`;
-    }
-
-    document.getElementById('dtC').innerHTML = `<div class="glass rounded-2xl overflow-hidden">${imgsHtml}<div class="p-6 md:p-8"><h2 class="text-white text-xl font-semibold mb-3">${r.name||'未命名'}</h2><div class="flex flex-wrap gap-2 mb-5"><span class="tag"><iconify-icon icon="lucide:hard-drive" width="12"></iconify-icon>${r.size||'未知大小'}</span><span class="tag"><iconify-icon icon="lucide:clock" width="12"></iconify-icon>${r.time||'刚刚'}</span><span class="tag"><iconify-icon icon="lucide:monitor" width="12"></iconify-icon>${r.compat||'通用'}</span></div><div class="mb-6"><h3 class="text-white/60 text-xs font-medium uppercase tracking-wider mb-2">资源介绍</h3><p class="text-white/40 text-sm leading-relaxed">${r.desc||'暂无介绍'}</p></div><div class="flex items-center gap-3"><span class="ht ${r.fav?'on':''} text-lg" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="20"></iconify-icon></span><button class="bd px-5 py-2.5 rounded-xl text-sm font-medium" onclick="opD(${r.id})">下载</button></div></div></div>`;
-    cP = 'detail'; getPages().forEach(el => el.classList.remove('on')); document.getElementById('p-detail').classList.add('on'); _ct.scrollTop = 0
-}
-function opD(id) {
-    const r = R.find(item => item.id === id);
-    if (!r) return;
-
-    // 有下载链接 → 直接跳转
-    if (r.dl && r.dl.trim() !== '') {
-        window.open(r.dl, '_blank');
-        return;
-    }
-
-    // 没有下载链接 → 弹窗显示群二维码
-    document.getElementById('dlB').innerHTML = `<div class="flex flex-col items-center p-4 rounded-xl bg-white/5"><p class="text-white/60 text-xs font-medium mb-3">免费下载</p><img src="/固定图片/群二维码.jpg" class="w-full max-w-[160px] h-auto rounded-lg mb-3 object-cover" onerror="this.style.display='none'"><p class="text-white/40 text-xs mt-1">加入QQ群：1044609733</p><button onclick="cp('1044609733')" class="copy-btn text-xs text-white/40 hover:text-white/70 transition px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10">复制</button></div>`;
-    opM('dlM');
-}
-function mkPd(id) { const r = R.find(item => item.id === id); if (!r) { toast('资源不存在'); return } if (r.paid) { toast('该资源已付费'); return } r.paid = true; clM('dlM'); toast('付费成功'); pushUserMeta(); rP(); opD(id) }
-function restoreCache() {
-    const theme = loadFromCache('theme', 'light'), toggle = document.getElementById('themeToggle');
-    let isLight = false;
-    if (theme === 'light') { toggle.classList.remove('on'); document.body.classList.add('light-theme'); isLight = true; } else { toggle.classList.add('on'); document.body.classList.remove('light-theme'); }
-    updateThemeColor(isLight);
-    try { localStorage.removeItem('mugen_favs'); localStorage.removeItem('mugen_paid'); } catch (e) {}
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { clM('dlM'); clM('spM'); clM('anM'); clM('chPwM'); } });
-restoreCache();
-fetch('data.json').then(res => res.json()).then(data => { 
-    if (data.resources && data.resources.length) {
-        R = data.resources;
-    }
-    updatesData = data.updates || []; 
-    if (_curUser) { const favIds = _curUser.user_metadata?.favs || [], paidIds = _curUser.user_metadata?.paid || []; R.forEach(item => { if (favIds.includes(item.id)) item.fav = true; if (paidIds.includes(item.id)) item.paid = true }); } 
-    if (!R.length) toast('暂无资源'); 
-    rH() 
-}).catch(() => { toast('加载失败'); rH() });
-opM('anM');
