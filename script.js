@@ -84,19 +84,16 @@ window.addEventListener('storage', function(e) { if (e.key === 'mugen_login_sync
 function go(p) { if (cP !== 'detail') _fromPage = cP; cP = p; getNavItems().forEach(n => n.classList.toggle('on', n.dataset.p === p)); getPages().forEach(el => el.classList.remove('on')); const target = document.getElementById('p-' + p); if (target) target.classList.add('on'); _sI.value = ''; sQ = ''; if (p === 'home') rH(); if (p === 'fav') rF(); if (p === 'purchased') rP(); if (p === 'updates') rU(); _ct.scrollTop = 0; if (window.innerWidth <= 768 && _sbMobile.classList.contains('op')) tgSB() }
 function doS() { clearTimeout(_sTimer); _sTimer = setTimeout(() => { sQ = _sI.value.trim().toLowerCase(); if (cP !== 'home') go('home'); rH() }, 300) }
 
-// ===== 改动的三个函数 =====
-
 function cHTML(r, sp) {
   const fc = r.fav ? 'on' : '';
   const coverImg = r.cover || r.img1 || '';
-  const formatText = r.format || 'MUGEN';
   let pt = '';
   if (sp && r.paid) pt = '<span class="text-xs text-emerald-400/70 bg-emerald-400/10 px-2 py-0.5 rounded-md ml-2">已付费</span>';
   return `<div class="c p-4 flex gap-4 items-start" data-card="${r.id}" onclick="goDt(${r.id})">
     <div class="db w-20 h-20 flex-shrink-0"><img src="${coverImg}" class="w-full h-full object-cover rounded" loading="lazy" decoding="async" onerror="this.parentElement.innerHTML='图片'"></div>
     <div class="flex-1 min-w-0">
       <div class="flex items-center"><h3 class="text-white text-sm font-medium leading-snug truncate">${r.name||'未命名'}</h3>${pt}</div>
-      <p class="text-white/30 text-xs mt-1.5">${formatText} · ${r.size||'未知大小'} · ${r.time||'刚刚'}</p>
+      <p class="text-white/30 text-xs mt-1.5">${r.size||'未知大小'} · ${r.time||'刚刚'}</p>
     </div>
     <div class="flex flex-col gap-2 flex-shrink-0" onclick="event.stopPropagation()">
       <span class="ht ${fc}" data-fav="${r.id}" onclick="tgF(${r.id})" title="收藏"><iconify-icon icon="lucide:star" width="18"></iconify-icon></span>
@@ -151,21 +148,16 @@ function opD(id) {
   const r = R.find(item => item.id === id);
   if (!r) return;
 
-  // 判断新旧格式：新格式有 format 且无 img1，旧格式无 format 且有 img1
   const isNewFormat = r.format && !r.img1;
 
-  // 有 dl 链接 → 直接跳转（新旧格式都走）
   if (r.dl && r.dl.trim() !== '') {
     window.location.href = r.dl;
     return;
   }
 
-  // 没有 dl 链接
   if (isNewFormat) {
-    // 新格式 → toast 提示
     toast('暂无下载链接');
   } else {
-    // 旧格式 → 弹窗显示群二维码
     document.getElementById('dlB').innerHTML = `
       <div class="flex flex-col items-center p-4 rounded-xl bg-white/5">
         <p class="text-white/60 text-xs font-medium mb-3">免费下载</p>
