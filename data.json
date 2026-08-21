@@ -104,6 +104,21 @@
       "dl": "",
       "paid": false,
       "price": "¥0"
+    },
+    {
+      "id": 7,
+      "name": "KOF XIII IN 97高清MUGEN",
+      "cover": "https://s41.ax1x.com/2026/08/20/pmxKBy4.jpg",
+      "img1": "",
+      "img2": "",
+      "img3": "",
+      "size": "864MB",
+      "time": "2026-08-20",
+      "compat": "通用",
+      "desc": "测试",
+      "dl": "",
+      "paid": false,
+      "price": "¥0"
     }
   ],
   "updates": []
